@@ -39,7 +39,7 @@ function getSunTimeMinutes(
   const dayOfYear = getDayOfYear(year, month, day);
   const longitudeHour = MEXICO_CITY_LONGITUDE / 15;
   const approximateTime = dayOfYear + ((isSunrise ? 6 : 18) - longitudeHour) / 24;
-  const meanAnomaly = (0.9856 * approximateTime) - 3.289;
+  const meanAnomaly = 0.9856 * approximateTime - 3.289;
   const trueLongitude =
     (meanAnomaly +
       1.916 * Math.sin((Math.PI / 180) * meanAnomaly) +
@@ -71,7 +71,6 @@ function getSunTimeMinutes(
     hourAngle / 15 + rightAscension - 0.06571 * approximateTime - 6.622;
   const utcHour = (localMeanTime - longitudeHour + 24) % 24;
 
-  // Mexico City is UTC-6 in 2026; the city no longer uses daylight saving time.
   return ((utcHour - 6 + 24) % 24) * 60;
 }
 
@@ -88,30 +87,26 @@ function isNightInMexicoCity(date = new Date()): boolean {
   return currentMinutes < sunrise || currentMinutes >= sunset;
 }
 
-function applyTheme(devicePrefersDark: boolean) {
+function applyTheme() {
   const override = window.localStorage.getItem("fira-theme-override");
   if (override === "dark" || override === "light") {
     document.documentElement.dataset.theme = override;
     return;
   }
 
-  const shouldUseDark = devicePrefersDark || isNightInMexicoCity();
-  document.documentElement.dataset.theme = shouldUseDark ? "dark" : "light";
+  document.documentElement.dataset.theme = isNightInMexicoCity() ? "dark" : "light";
 }
 
 export default function ThemeManager() {
   useEffect(() => {
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const updateTheme = () => applyTheme(media.matches);
+    const updateTheme = () => applyTheme();
 
     updateTheme();
-    media.addEventListener("change", updateTheme);
     window.addEventListener("focus", updateTheme);
     window.addEventListener("fira-theme-change", updateTheme);
     const interval = window.setInterval(updateTheme, 15 * 60 * 1000);
 
     return () => {
-      media.removeEventListener("change", updateTheme);
       window.removeEventListener("focus", updateTheme);
       window.removeEventListener("fira-theme-change", updateTheme);
       window.clearInterval(interval);

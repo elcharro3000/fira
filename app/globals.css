@@ -447,7 +447,7 @@ a, button, input, textarea, select {
 }
 
 [data-theme="dark"] .fira-logo {
-  background-color: #F4F8FF;
+  background-color: var(--accent);
 }
 
 [data-theme="dark"] input,
