@@ -9,8 +9,6 @@ export const SERVICES = [
   { id: "flow-full-body", name: "Flow Full Body", durationMinutes: 55, priceCents: 35000 },
   { id: "stretching-meditation", name: "Stretching & Meditation", durationMinutes: 55, priceCents: 35000 },
   { id: "reformer-burn", name: "Reformer Burn", durationMinutes: 55, priceCents: 35000 },
-  // Temporary test service — remove once emails are confirmed working
-  { id: "prueba-email", name: "Clase Prueba (Test)", durationMinutes: 55, priceCents: 1000 },
 ] as const;
 
 export type ServiceId = (typeof SERVICES)[number]["id"];

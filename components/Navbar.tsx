@@ -31,10 +31,7 @@ export default function Navbar() {
       <div className="flex items-center justify-between px-4 py-2 md:px-6 md:py-3">
         {/* Logo */}
         <a href="/" className="flex-shrink-0" aria-label="FIRA Wellness Club">
-          <span className="fira-logo fira-logo-nav hidden md:block" aria-hidden="true" />
-          <span className="md:hidden font-[family-name:var(--font-playfair)] text-2xl font-bold tracking-[0.16em] text-[#FFD0E0]" aria-hidden="true">
-            FIRA
-          </span>
+          <span className="fira-logo fira-logo-nav" aria-hidden="true" />
         </a>
 
         {/* Desktop Nav Links */}

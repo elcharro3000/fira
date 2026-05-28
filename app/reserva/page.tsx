@@ -12,7 +12,6 @@ const SERVICE_NAMES: Record<string, string> = {
   "flow-full-body": "Flow Full Body",
   "stretching-meditation": "Stretching & Meditation",
   "reformer-burn": "Reformer Burn",
-  "prueba-email": "Clase Prueba",
 };
 
 function formatSlot(slotId: string | null): string | null {

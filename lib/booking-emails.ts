@@ -48,7 +48,7 @@ export async function sendBookingEmails(
   const formattedDate = formatBookingDate(payload.startsAt);
 
   try {
-    const clientEmail = await resend.emails.send({
+    await resend.emails.send({
       from: RESEND_FROM_EMAIL,
       to: payload.customerEmail,
       replyTo: STUDIO_EMAIL,
@@ -66,14 +66,6 @@ export async function sendBookingEmails(
         <p>— FIRA Wellness Club</p>
       `,
     });
-    console.log("booking email send success", {
-      type: "client_confirmation",
-      sessionId: payload.sessionId,
-      bookingId: payload.bookingId,
-      resendId: clientEmail.data?.id,
-      to: payload.customerEmail,
-      from: RESEND_FROM_EMAIL,
-    });
   } catch (e) {
     console.error("Client confirmation email failed", {
       sessionId: payload.sessionId,
@@ -85,7 +77,7 @@ export async function sendBookingEmails(
   }
 
   try {
-    const studioEmail = await resend.emails.send({
+    await resend.emails.send({
       from: RESEND_FROM_EMAIL,
       to: STUDIO_EMAIL,
       subject: `Nueva reserva: ${payload.customerName} — ${payload.serviceName}`,
@@ -98,14 +90,6 @@ export async function sendBookingEmails(
         <p><strong>Fecha y hora:</strong> ${formattedDate}</p>
         <p><strong>Session Stripe:</strong> ${payload.sessionId}</p>
       `,
-    });
-    console.log("booking email send success", {
-      type: "studio_notification",
-      sessionId: payload.sessionId,
-      bookingId: payload.bookingId,
-      resendId: studioEmail.data?.id,
-      to: STUDIO_EMAIL,
-      from: RESEND_FROM_EMAIL,
     });
   } catch (e) {
     console.error("Studio notification email failed", {

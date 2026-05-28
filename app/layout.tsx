@@ -17,6 +17,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://fira-eta.vercel.app"),
   title: "FIRA Wellness Club | Pilates en Polanco",
   description:
     "Da el primer paso en un camino que te lleva más allá de tus límites con FIRA Wellness Club. Pilates reformer en Polanco, Ciudad de México.",

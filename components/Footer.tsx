@@ -5,10 +5,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <span className="fira-logo fira-logo-footer hidden md:block" role="img" aria-label="FIRA Wellness Club" />
-            <span className="md:hidden font-[family-name:var(--font-playfair)] text-xl font-bold tracking-[0.16em] text-[#FFD0E0]" aria-hidden="true">
-              FIRA
-            </span>
+            <span className="fira-logo fira-logo-footer" role="img" aria-label="FIRA Wellness Club" />
             <span className="text-sm text-warm-gray">Wellness Club</span>
           </div>
 

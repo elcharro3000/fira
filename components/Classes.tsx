@@ -53,16 +53,6 @@ const classes = [
     intensity: "Alta",
     icon: "💪",
   },
-  // Temporary test class — remove once emails are confirmed working
-  {
-    name: "Clase Prueba ($10)",
-    serviceId: "prueba-email",
-    active: false,
-    description:
-      "Clase de prueba temporal para verificar el sistema de correos de confirmación. Costo: $10 MXN.",
-    intensity: "Baja",
-    icon: "🧪",
-  },
 ];
 
 function IntensityBadge({ level }: { level: string }) {

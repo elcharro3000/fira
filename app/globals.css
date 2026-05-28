@@ -431,15 +431,9 @@ a, button, input, textarea, select {
 
 .fira-logo {
   display: block;
-  background-color: #F8AFC7;
+  background-color: var(--accent);
   mask: url("/FIRA LOGO.avif") center / contain no-repeat;
   -webkit-mask: url("/FIRA LOGO.avif") center / contain no-repeat;
-}
-
-@media (max-width: 767px) {
-  .fira-logo {
-    background-color: #FFD0E0;
-  }
 }
 
 .fira-logo-nav {
