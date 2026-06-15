@@ -39,7 +39,6 @@ export interface SheetScheduleSlot {
 }
 
 interface SheetScheduleRow {
-  date: string;
   day: string;
   time: string;
   class_name: string;
@@ -99,7 +98,6 @@ function rowsFromCsv(csv: string): SheetScheduleRow[] {
     });
 
     return {
-      date: row.date ?? "",
       day: row.day ?? "",
       time: row.time ?? "",
       class_name: row.class_name ?? row.class ?? "Reformer Burn",
@@ -118,14 +116,6 @@ function parseTime(time: string): { hour: number; minute: number } | null {
   if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
 
   return { hour, minute };
-}
-
-function parseDate(value: string): string | null {
-  const date = value.trim();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
-
-  const parsed = new Date(`${date}T00:00:00`);
-  return Number.isNaN(parsed.getTime()) ? null : date;
 }
 
 function parseDay(value: string): number | null {
@@ -159,13 +149,26 @@ export async function getSheetScheduleSlots(
   toDate: Date,
 ): Promise<SheetScheduleSlot[]> {
   const csvUrl = process.env.GOOGLE_SHEET_CSV_URL ?? DEFAULT_SHEET_CSV_URL;
-  const response = await fetch(csvUrl, { cache: "no-store" });
+  const response = await fetch(csvUrl, {
+    cache: "no-store",
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+      Accept: "text/csv",
+    },
+  });
 
   if (!response.ok) {
     throw new Error(`Google Sheet schedule fetch failed: ${response.status}`);
   }
 
-  const rows = rowsFromCsv(await response.text());
+  const text = await response.text();
+
+  if (text.includes("<html") || text.includes("<HTML")) {
+    throw new Error("Google returned HTML instead of CSV — sheet may not be published to web");
+  }
+
+  const rows = rowsFromCsv(text);
   if (rows.length === 0) {
     return getSlotsForDateRange(fromDate, toDate).map((slot) => ({
       ...slot,
@@ -176,29 +179,24 @@ export async function getSheetScheduleSlots(
   }
 
   const slots = new Map<string, SheetScheduleSlot>();
-  const cancelledSlotIds = new Set<string>();
 
   for (const row of rows) {
     const time = parseTime(row.time);
     const capacity = Number(row.capacity) || 8;
     const className = row.class_name || "Reformer Burn";
     if (!time || capacity <= 0) continue;
+    if (!isActive(row.active)) continue;
 
-    const date = parseDate(row.date);
-    const dates = date
-      ? [date]
-      : datesInRangeForDay(fromDate, toDate, parseDay(row.day) ?? -1);
+    const dayNum = parseDay(row.day);
+    if (dayNum === null) continue;
+
+    const dates = datesInRangeForDay(fromDate, toDate, dayNum);
 
     for (const slotDate of dates) {
       const slotDateObj = new Date(`${slotDate}T00:00:00`);
       if (slotDateObj < fromDate || slotDateObj > toDate) continue;
 
       const slotId = slotToId(slotDate, time.hour, time.minute);
-      if (!isActive(row.active)) {
-        cancelledSlotIds.add(slotId);
-        continue;
-      }
-
       slots.set(slotId, {
         date: slotDate,
         hour: time.hour,
@@ -209,8 +207,6 @@ export async function getSheetScheduleSlots(
       });
     }
   }
-
-  cancelledSlotIds.forEach((slotId) => slots.delete(slotId));
 
   return Array.from(slots.values()).sort((a, b) => a.slotId.localeCompare(b.slotId));
 }

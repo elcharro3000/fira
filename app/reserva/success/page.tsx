@@ -1,6 +1,20 @@
 import Navbar from "@/components/Navbar";
+import { confirmBookingAndSendEmails } from "@/lib/confirm-booking";
 
-export default function ReservaSuccessPage() {
+export const dynamic = "force-dynamic";
+
+export default async function ReservaSuccessPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ session_id?: string }>;
+}) {
+  const { session_id } = await searchParams;
+  if (session_id) {
+    // Sends the confirmation emails (idempotent). This is the reliable path
+    // that does not depend on the Stripe webhook being configured.
+    await confirmBookingAndSendEmails(session_id);
+  }
+
   return (
     <>
       <Navbar />

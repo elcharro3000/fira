@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
 import Stripe from "stripe";
-import { sendBookingEmails } from "@/lib/booking-emails";
-import { updateBookingStatus } from "@/lib/bookings-store";
+import { confirmBookingAndSendEmails } from "@/lib/confirm-booking";
 
 export const dynamic = "force-dynamic";
 
@@ -42,28 +40,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (event.type === "checkout.session.completed") {
+  if (
+    event.type === "checkout.session.completed" ||
+    event.type === "checkout.session.async_payment_succeeded"
+  ) {
     const session = event.data.object as Stripe.Checkout.Session;
-    const metadata = session.metadata ?? {};
-    const bookingId = metadata.bookingId;
-
-    if (bookingId) {
-      updateBookingStatus(bookingId, "paid", session.id);
-    }
-
-    const resend = process.env.RESEND_API_KEY
-      ? new Resend(process.env.RESEND_API_KEY)
-      : null;
-
-    await sendBookingEmails(resend, {
-      bookingId,
-      sessionId: session.id,
-      serviceName: metadata.serviceName ?? "Clase FIRA",
-      startsAt: metadata.startsAt ?? "",
-      customerName: metadata.customerName ?? session.customer_details?.name ?? "Cliente",
-      customerEmail: metadata.customerEmail ?? session.customer_details?.email ?? "",
-      customerPhone: metadata.customerPhone ?? session.customer_details?.phone ?? "",
-    });
+    // Idempotent: safe even if the success page already sent the emails.
+    await confirmBookingAndSendEmails(session.id);
   }
 
   return NextResponse.json({ received: true });
