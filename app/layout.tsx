@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
+import DarkModeReflections from "@/components/DarkModeReflections";
+import ThemeManager from "@/components/ThemeManager";
 import "./globals.css";
 
 const inter = Inter({
@@ -15,6 +17,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://fira-eta.vercel.app"),
   title: "FIRA Wellness Club | Pilates en Polanco",
   description:
     "Da el primer paso en un camino que te lleva más allá de tus límites con FIRA Wellness Club. Pilates reformer en Polanco, Ciudad de México.",
@@ -48,6 +51,8 @@ export default function RootLayout({
   return (
     <html lang="es" className="scroll-smooth">
       <body className={`${inter.variable} ${playfair.variable} antialiased`}>
+        <ThemeManager />
+        <DarkModeReflections />
         {children}
       </body>
     </html>

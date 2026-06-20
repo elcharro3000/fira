@@ -1,8 +1,4 @@
-"use client";
-
-import { motion } from "framer-motion";
-
-const BOOKING_URL = "https://www.firawellness.com/reserva-online";
+import { BOOKING_URL } from "@/lib/constants";
 
 export default function Hero() {
   return (
@@ -10,30 +6,30 @@ export default function Hero() {
       id="inicio"
       className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-4"
     >
+      {/* Animated Orb */}
       <div className="orb" />
+
+      {/* Floating Bubbles */}
       <div className="bubble bubble-1" />
       <div className="bubble bubble-2" />
       <div className="bubble bubble-3" />
       <div className="bubble bubble-4" />
 
+      {/* Content */}
       <div className="relative z-10 text-center max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="inline-flex items-center gap-2 bg-white/60 backdrop-blur-md border border-peach/40 rounded-full px-4 py-2 mb-8"
+        {/* Badge */}
+        <div
+          className="reveal-up reveal-delay-1 inline-flex items-center gap-2 bg-white/60 backdrop-blur-md border border-peach/40 rounded-full px-4 py-2 mb-8"
         >
           <span className="w-2 h-2 rounded-full bg-coral animate-pulse" />
           <span className="text-sm font-medium text-warm-gray">
-            Pilates Reformer en Polanco
+            Wellness Club &amp; Pilates &nbsp;·&nbsp; Polanco, CDMX
           </span>
-        </motion.div>
+        </div>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-[1.1] mb-6"
+        {/* Main Heading */}
+        <h1
+          className="reveal-up reveal-delay-2 text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-[1.1] mb-6"
         >
           Da el primer paso
           <br />
@@ -42,29 +38,23 @@ export default function Hero() {
           <span className="font-[family-name:var(--font-playfair)] italic text-coral">
             límites
           </span>
-        </motion.h1>
+        </h1>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.7 }}
-          className="text-base sm:text-lg text-warm-gray max-w-xl mx-auto mb-10 leading-relaxed"
+        {/* Subtitle */}
+        <p
+          className="reveal-up reveal-delay-3 text-base sm:text-lg text-warm-gray max-w-xl mx-auto mb-10 leading-relaxed"
         >
           FIRA Wellness Club te invita a descubrir un camino donde tu cuerpo, tu
           mente y tu energía son prioridad. Pilates reformer en un espacio
           diseñado para ti.
-        </motion.p>
+        </p>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.9 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+        {/* CTAs */}
+        <div
+          className="reveal-up reveal-delay-4 flex flex-col sm:flex-row items-center justify-center gap-4"
         >
           <a
             href={BOOKING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
             className="group flex items-center gap-2 bg-coral text-white px-8 py-3.5 rounded-full font-semibold text-base hover:bg-coral-dark transition-all duration-300 shadow-lg shadow-coral/25 hover:shadow-xl hover:shadow-coral/30"
           >
             Reserva Clase
@@ -82,7 +72,6 @@ export default function Hero() {
               />
             </svg>
           </a>
-
           <a
             href="#clases"
             className="flex items-center gap-2 px-8 py-3.5 rounded-full font-semibold text-base border border-foreground/15 text-foreground hover:border-coral/40 hover:text-coral transition-all duration-300"
@@ -102,9 +91,10 @@ export default function Hero() {
             </svg>
             Conoce Más
           </a>
-        </motion.div>
+        </div>
       </div>
 
+      {/* Bottom fade */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-10" />
     </section>
   );

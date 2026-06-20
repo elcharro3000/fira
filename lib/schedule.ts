@@ -1,90 +1,112 @@
-export type ServiceId = "reformer-burn" | "prueba-email";
+/**
+ * Service definitions for booking (match class types on site).
+ * Price in MXN centavos for one class (drop-in).
+ */
+export const SERVICES = [
+  { id: "core-sculpt", name: "Core Sculpt", durationMinutes: 55, priceCents: 35000 },
+  { id: "lower-body-burn", name: "Lower Body Burn", durationMinutes: 55, priceCents: 35000 },
+  { id: "full-body-burn", name: "Full Body Burn", durationMinutes: 55, priceCents: 35000 },
+  { id: "flow-full-body", name: "Flow Full Body", durationMinutes: 55, priceCents: 35000 },
+  { id: "stretching-meditation", name: "Stretching & Meditation", durationMinutes: 55, priceCents: 35000 },
+  { id: "reformer-burn", name: "Reformer Burn", durationMinutes: 55, priceCents: 35000 },
+] as const;
 
-export interface Service {
-  id: ServiceId;
-  name: string;
-  priceCents: number;
-}
+export type ServiceId = (typeof SERVICES)[number]["id"];
 
-export const SERVICES: Service[] = [
-  {
-    id: "reformer-burn",
-    name: "Reformer Burn",
-    priceCents: 35000,
-  },
-  {
-    id: "prueba-email",
-    name: "Clase Prueba (Test)",
-    priceCents: 1000,
-  },
-];
+export const STUDIO_TIME_ZONE = "America/Mexico_City";
 
-// Day-of-week schedule: 0=Sunday, 1=Monday, ..., 6=Saturday
-// Each entry is [hour, minute] in 24h
+/**
+ * Exact Reformer Burn weekly schedule.
+ * Keys are JS day numbers: 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat.
+ * Values are [hour, minute] pairs in 24h format.
+ */
 export const REFORMER_BURN_SCHEDULE: Record<number, [number, number][]> = {
-  0: [], // Sunday — closed
-  1: [[7, 0], [8, 0], [9, 0], [10, 0], [17, 0], [18, 0], [19, 0]],
-  2: [[7, 0], [8, 0], [9, 0], [10, 0], [17, 0], [18, 0], [19, 0]],
-  3: [[7, 0], [8, 0], [9, 0], [10, 0], [17, 0], [18, 0], [19, 0]],
-  4: [[7, 0], [8, 0], [9, 0], [10, 0], [17, 0], [18, 0], [19, 0]],
-  5: [[7, 0], [8, 0], [9, 0], [10, 0], [17, 0], [18, 0], [19, 0]],
-  6: [[8, 0], [9, 0], [10, 0], [11, 0]], // Saturday
+  1: [[7,10],[8,10],[9,10],[10,10],[11,10],[12,10],[13,10],[18,10],[19,10],[20,10]],
+  2: [[7,10],[8,10],[9,10],[10,10],[11,10],[12,10],[13,10],[18,10],[19,10],[20,10]],
+  3: [[7,10],[8,10],[9,10],[10,10],[11,10],[12,10],[13,10],[18,10],[19,10],[20,10]],
+  4: [[7,10],[8,10],[9,10],[10,10],[11,10],[12,10],[13,10],[18,10],[19,10],[20,10]],
+  5: [[7,10],[8,10],[9,10],[10,10],[11,10],[12,10],[13,10],[14,10],[15,10],[16,10]],
+  6: [[10,10],[11,10],[12,10],[13,10]],
 };
 
-const SCHEDULE_BY_SERVICE: Record<ServiceId, Record<number, [number, number][]>> = {
-  "reformer-burn": REFORMER_BURN_SCHEDULE,
-  "prueba-email": {
-    0: [[10, 0]], 1: [[10, 0]], 2: [[10, 0]],
-    3: [[10, 0]], 4: [[10, 0]], 5: [[10, 0]], 6: [[10, 0]],
-  },
-};
+/**
+ * Generate available slot times for a date range using the real schedule.
+ */
+export function getSlotsForDateRange(
+  fromDate: Date,
+  toDate: Date,
+): { date: string; hour: number; minute: number }[] {
+  const slots: { date: string; hour: number; minute: number }[] = [];
+  const cur = new Date(fromDate);
+  cur.setHours(0, 0, 0, 0);
 
-export interface Slot {
-  date: string; // YYYY-MM-DD
-  hour: number;
-  minute: number;
-  serviceId: ServiceId;
+  while (cur <= toDate) {
+    const day = cur.getDay();
+    const times = REFORMER_BURN_SCHEDULE[day] ?? [];
+    for (const [hour, minute] of times) {
+      slots.push({
+        date: cur.toISOString().slice(0, 10),
+        hour,
+        minute,
+      });
+    }
+    cur.setDate(cur.getDate() + 1);
+  }
+  return slots;
 }
 
+/**
+ * Convert a slot to a unique ISO-like string ID.
+ */
 export function slotToId(date: string, hour: number, minute: number): string {
-  return `${date}_${String(hour).padStart(2, "0")}_${String(minute).padStart(2, "0")}`;
+  return `${date}T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00`;
+}
+
+function getTimeZoneOffsetMs(date: Date, timeZone: string): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).formatToParts(date);
+
+  const values = Object.fromEntries(
+    parts
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, Number(part.value)]),
+  );
+
+  const zonedTime = Date.UTC(
+    values.year,
+    values.month - 1,
+    values.day,
+    values.hour,
+    values.minute,
+    values.second,
+  );
+
+  return zonedTime - date.getTime();
+}
+
+export function getSlotStartsAt(
+  date: string,
+  hour: number,
+  minute: number,
+  timeZone = STUDIO_TIME_ZONE,
+): Date {
+  const [year, month, day] = date.split("-").map(Number);
+  const utcGuess = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
+  const offset = getTimeZoneOffsetMs(utcGuess, timeZone);
+
+  return new Date(utcGuess.getTime() - offset);
 }
 
 export function slotFromId(slotId: string): { date: string; hour: number; minute: number } {
-  const parts = slotId.split("_");
-  return {
-    date: parts[0],
-    hour: parseInt(parts[1], 10),
-    minute: parseInt(parts[2], 10),
-  };
-}
-
-export function getSlotsForDateRange(
-  from: Date,
-  to: Date,
-  serviceId: ServiceId = "reformer-burn"
-): Slot[] {
-  const schedule = SCHEDULE_BY_SERVICE[serviceId] ?? REFORMER_BURN_SCHEDULE;
-  const slots: Slot[] = [];
-  const now = new Date();
-
-  const cursor = new Date(from);
-  cursor.setHours(0, 0, 0, 0);
-
-  while (cursor <= to) {
-    const dow = cursor.getDay();
-    const times = schedule[dow] ?? [];
-    const dateStr = cursor.toISOString().slice(0, 10);
-
-    for (const [h, m] of times) {
-      const slotTime = new Date(`${dateStr}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`);
-      if (slotTime > now) {
-        slots.push({ date: dateStr, hour: h, minute: m, serviceId });
-      }
-    }
-
-    cursor.setDate(cursor.getDate() + 1);
-  }
-
-  return slots;
+  const [date, time] = slotId.split("T");
+  const [h, m] = (time || "00:00:00").split(":").map(Number);
+  return { date: date || "", hour: h || 0, minute: m || 0 };
 }

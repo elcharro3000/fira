@@ -1,60 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  getSlotsForDateRange,
-  slotToId,
-  SERVICES,
-  type ServiceId,
-} from "@/lib/schedule";
 import { getPaidBookingsForSlot } from "@/lib/bookings-store";
+import { getSheetScheduleSlots } from "@/lib/google-sheets-schedule";
+import { getSlotStartsAt } from "@/lib/schedule";
 
-export async function GET(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const serviceId = searchParams.get("serviceId") as ServiceId | null;
-    const from = searchParams.get("from"); // YYYY-MM-DD
-    const to = searchParams.get("to");
+export const dynamic = "force-dynamic";
 
-    if (!from || !to) {
-      return NextResponse.json(
-        { error: "from and to (YYYY-MM-DD) required" },
-        { status: 400 }
-      );
-    }
+function parseDateParam(value: string | null): Date | null {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
 
-    const fromDate = new Date(from + "T00:00:00");
-    const toDate = new Date(to + "T23:59:59");
-    if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
-      return NextResponse.json({ error: "Invalid date range" }, { status: 400 });
-    }
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
 
-    const allSlots = getSlotsForDateRange(fromDate, toDate);
-    const bookedSlotIds = new Set<string>();
-    for (const slot of allSlots) {
-      const slotId = slotToId(slot.date, slot.hour, slot.minute);
-      const paid = getPaidBookingsForSlot(slotId);
-      if (paid.length > 0) bookedSlotIds.add(slotId);
-    }
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const from = parseDateParam(searchParams.get("from"));
+  const to = parseDateParam(searchParams.get("to"));
 
-    const available = allSlots
-      .filter((s) => !bookedSlotIds.has(slotToId(s.date, s.hour, s.minute)))
-      .map((s) => ({
-        date: s.date,
-        hour: s.hour,
-        minute: s.minute,
-        slotId: slotToId(s.date, s.hour, s.minute),
-      }));
-
-    return NextResponse.json({
-      slots: available,
-      services: serviceId
-        ? SERVICES.filter((s) => s.id === serviceId)
-        : SERVICES,
-    });
-  } catch (e) {
-    console.error("availability", e);
+  if (!from || !to || from > to) {
     return NextResponse.json(
-      { error: "Failed to load availability" },
-      { status: 500 }
+      { error: "Invalid date range" },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const now = new Date();
+    const slots = (await getSheetScheduleSlots(from, to)).map((slot) => {
+      const startsAt = getSlotStartsAt(slot.date, slot.hour, slot.minute);
+      const bookedCount = getPaidBookingsForSlot(slot.slotId).length;
+      const spotsLeft = Math.max(slot.capacity - bookedCount, 0);
+
+      return {
+        ...slot,
+        available: spotsLeft > 0 && startsAt >= now,
+        spotsLeft,
+        startsAt: startsAt.toISOString(),
+      };
+    });
+
+    return NextResponse.json(
+      { slots },
+      { headers: { "Cache-Control": "no-store" } },
+    );
+  } catch (error) {
+    console.error("availability sheet fetch failed", error);
+    return NextResponse.json(
+      { error: "Schedule unavailable", slots: [] },
+      { status: 503 },
     );
   }
 }

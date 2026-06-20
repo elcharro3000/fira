@@ -1,17 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
 
 const navLinks = [
-  { label: "Inicio", href: "#inicio" },
-  { label: "Clases", href: "#clases" },
-  { label: "Precios", href: "#precios" },
-  { label: "Contacto", href: "#contacto" },
+  { label: "Inicio", href: "/#inicio" },
+  { label: "Clases", href: "/#clases" },
+  { label: "Membresias", href: "/#precios" },
+  { label: "Calendario", href: "/calendario" },
+  { label: "Contacto", href: "/#contacto" },
 ];
 
-const BOOKING_URL = "https://www.firawellness.com/reserva-online";
+import { BOOKING_URL } from "@/lib/constants";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -24,30 +23,18 @@ export default function Navbar() {
   }, []);
 
   return (
-    <motion.nav
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
+    <nav
       className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-5xl rounded-full glass-nav transition-all duration-300 ${
         scrolled ? "shadow-lg shadow-coral/5" : ""
       }`}
     >
       <div className="flex items-center justify-between px-4 py-2 md:px-6 md:py-3">
-        <a href="#inicio" className="flex-shrink-0">
-          <Image
-            src="/FIRA LOGO.avif"
-            alt="FIRA Wellness Club"
-            width={80}
-            height={36}
-            className="h-8 w-auto md:h-9"
-            style={{
-              filter:
-                "brightness(0) saturate(100%) invert(42%) sepia(53%) saturate(2065%) hue-rotate(316deg) brightness(92%) contrast(90%)",
-            }}
-            priority
-          />
+        {/* Logo */}
+        <a href="/" className="flex-shrink-0" aria-label="FIRA Wellness Club">
+          <span className="fira-logo fira-logo-nav" aria-hidden="true" />
         </a>
 
+        {/* Desktop Nav Links */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
             <a
@@ -60,15 +47,15 @@ export default function Navbar() {
           ))}
         </div>
 
+        {/* CTA Button */}
         <a
           href={BOOKING_URL}
-          target="_blank"
-          rel="noopener noreferrer"
           className="hidden md:inline-flex items-center gap-2 bg-coral text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-coral-dark transition-colors duration-200 shadow-md shadow-coral/20"
         >
           Reserva Clase
         </a>
 
+        {/* Mobile Menu Button */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="md:hidden flex flex-col gap-1.5 p-2"
@@ -92,16 +79,10 @@ export default function Navbar() {
         </button>
       </div>
 
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden overflow-hidden"
-          >
-            <div className="flex flex-col items-center gap-4 pb-6 pt-2">
+      {/* Mobile Menu */}
+      {mobileOpen && (
+        <div className="md:hidden overflow-hidden">
+          <div className="flex flex-col items-center gap-4 pb-6 pt-2">
               {navLinks.map((link) => (
                 <a
                   key={link.href}
@@ -114,16 +95,13 @@ export default function Navbar() {
               ))}
               <a
                 href={BOOKING_URL}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="bg-coral text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-coral-dark transition-colors shadow-md shadow-coral/20"
               >
                 Reserva Clase
               </a>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.nav>
+          </div>
+        </div>
+      )}
+    </nav>
   );
 }

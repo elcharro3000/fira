@@ -3,17 +3,18 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import { REFORMER_BURN_SCHEDULE } from "@/lib/schedule";
 
 interface Slot {
   date: string;
   hour: number;
   minute: number;
   slotId: string;
+  className: string;
+  available: boolean;
+  startsAt: string;
 }
 
 const SERVICE_ID = "reformer-burn";
-const SERVICE_NAME = "Reformer Burn";
 
 const DAY_LABELS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 const MONTH_LABELS = [
@@ -50,8 +51,9 @@ function formatDateRange(monday: Date): string {
 export default function CalendarioPage() {
   const router = useRouter();
   const [monday, setMonday] = useState<Date>(() => getMondayOfWeek(new Date()));
-  const [availableSlotIds, setAvailableSlotIds] = useState<Set<string>>(new Set());
+  const [slots, setSlots] = useState<Slot[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const weekDays = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday);
@@ -64,14 +66,20 @@ export default function CalendarioPage() {
 
   const fetchAvailability = useCallback(async () => {
     setLoading(true);
+    setError(false);
     try {
       const res = await fetch(
-        `/api/availability?from=${fromStr}&to=${toStr}&serviceId=${SERVICE_ID}`
+        `/api/availability?from=${fromStr}&to=${toStr}&serviceId=${SERVICE_ID}`,
+        { cache: "no-store" },
       );
+      if (!res.ok) throw new Error("Availability request failed");
       const data = await res.json();
       if (data.slots) {
-        setAvailableSlotIds(new Set((data.slots as Slot[]).map((s) => s.slotId)));
+        setSlots(data.slots as Slot[]);
       }
+    } catch {
+      setSlots([]);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -97,14 +105,11 @@ export default function CalendarioPage() {
     router.push(`/reserva?serviceId=${SERVICE_ID}&slotId=${encodeURIComponent(slotId)}`);
   };
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  // Collect all unique times across the week for row labels
+  const now = new Date();
+  const slotsById = new Map(slots.map((slot) => [slot.slotId, slot]));
   const allTimes = new Set<string>();
-  weekDays.forEach((day) => {
-    const times = REFORMER_BURN_SCHEDULE[day.getDay()] ?? [];
-    times.forEach(([h, m]) => allTimes.add(`${h}:${String(m).padStart(2, "0")}`));
+  slots.forEach((slot) => {
+    allTimes.add(`${slot.hour}:${String(slot.minute).padStart(2, "0")}`);
   });
   const sortedTimes = Array.from(allTimes).sort((a, b) => {
     const [ah, am] = a.split(":").map(Number);
@@ -158,6 +163,14 @@ export default function CalendarioPage() {
           {/* Calendar grid */}
           {loading ? (
             <div className="text-center py-20 text-warm-gray">Cargando horarios...</div>
+          ) : error ? (
+            <div className="text-center py-20 text-warm-gray">
+              No pudimos cargar los horarios. Intenta de nuevo más tarde.
+            </div>
+          ) : sortedTimes.length === 0 ? (
+            <div className="text-center py-20 text-warm-gray">
+              No hay clases programadas para esta semana.
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full border-separate border-spacing-1.5 min-w-[640px]">
@@ -200,16 +213,16 @@ export default function CalendarioPage() {
                           {formatSlotTime(rowH, rowM)}
                         </td>
                         {weekDays.map((day, di) => {
-                          const times = REFORMER_BURN_SCHEDULE[day.getDay()] ?? [];
-                          const hasSlot = times.some(([h, m]) => h === rowH && m === rowM);
-                          if (!hasSlot) {
-                            return <td key={di} />;
-                          }
                           const dateStr = day.toISOString().slice(0, 10);
                           const slotId = `${dateStr}T${String(rowH).padStart(2, "0")}:${String(rowM).padStart(2, "0")}:00`;
-                          const isPast = day < today;
-                          const isAvailable = availableSlotIds.has(slotId);
-                          const bookable = !isPast && isAvailable;
+                          const slot = slotsById.get(slotId);
+
+                          if (!slot) {
+                            return <td key={di} />;
+                          }
+
+                          const isPast = new Date(slot.startsAt) < now;
+                          const bookable = !isPast && slot.available;
 
                           return (
                             <td key={di} className="p-0">
@@ -223,7 +236,7 @@ export default function CalendarioPage() {
                                 }`}
                               >
                                 <p className="text-xs font-medium text-foreground mb-1">
-                                  {SERVICE_NAME}
+                                  {slot.className}
                                 </p>
                                 {bookable ? (
                                   <button

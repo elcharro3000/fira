@@ -1,72 +1,70 @@
 import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
 import { Resend } from "resend";
-import { getBookingByStripeSessionId, updateBookingStatus } from "@/lib/bookings-store";
+import Stripe from "stripe";
 import { sendBookingEmails } from "@/lib/booking-emails";
+import { updateBookingStatus } from "@/lib/bookings-store";
 
-const stripe =
-  process.env.STRIPE_SECRET_KEY && new Stripe(process.env.STRIPE_SECRET_KEY);
-const resend =
-  process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+export const dynamic = "force-dynamic";
 
-export async function POST(req: NextRequest) {
-  if (!stripe || !process.env.STRIPE_WEBHOOK_SECRET) {
+function getStripe(): Stripe | null {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  return secretKey ? new Stripe(secretKey) : null;
+}
+
+export async function POST(request: NextRequest) {
+  const stripe = getStripe();
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!stripe || !webhookSecret) {
     return NextResponse.json(
-      { error: "Webhook or Stripe not configured" },
-      { status: 503 }
+      { error: "Stripe webhook is not configured" },
+      { status: 500 },
     );
   }
 
-  const body = await req.text();
-  const sig = req.headers.get("stripe-signature");
-  if (!sig) {
-    return NextResponse.json({ error: "No signature" }, { status: 400 });
+  const signature = request.headers.get("stripe-signature");
+  if (!signature) {
+    return NextResponse.json({ error: "Missing signature" }, { status: 400 });
   }
 
   let event: Stripe.Event;
+
   try {
     event = stripe.webhooks.constructEvent(
-      body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
+      await request.text(),
+      signature,
+      webhookSecret,
     );
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    return NextResponse.json({ error: `Webhook signature failed: ${message}` }, { status: 400 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Invalid signature" },
+      { status: 400 },
+    );
   }
 
-  if (event.type !== "checkout.session.completed") {
-    return NextResponse.json({ received: true });
-  }
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const metadata = session.metadata ?? {};
+    const bookingId = metadata.bookingId;
 
-  const session = event.data.object as Stripe.Checkout.Session;
-  const booking = getBookingByStripeSessionId(session.id);
-  if (booking) {
-    updateBookingStatus(booking.id, "paid", session.id);
-  } else {
-    console.warn("webhook booking not found in memory, using Stripe metadata", {
+    if (bookingId) {
+      updateBookingStatus(bookingId, "paid", session.id);
+    }
+
+    const resend = process.env.RESEND_API_KEY
+      ? new Resend(process.env.RESEND_API_KEY)
+      : null;
+
+    await sendBookingEmails(resend, {
+      bookingId,
       sessionId: session.id,
-      bookingId: session.metadata?.bookingId,
+      serviceName: metadata.serviceName ?? "Clase FIRA",
+      startsAt: metadata.startsAt ?? "",
+      customerName: metadata.customerName ?? session.customer_details?.name ?? "Cliente",
+      customerEmail: metadata.customerEmail ?? session.customer_details?.email ?? "",
+      customerPhone: metadata.customerPhone ?? session.customer_details?.phone ?? "",
     });
   }
-
-  const emailPayload = {
-    bookingId: booking?.id ?? session.metadata?.bookingId,
-    sessionId: session.id,
-    serviceName: booking?.serviceName ?? session.metadata?.serviceName ?? "Clase",
-    startsAt: booking?.startsAt ?? session.metadata?.startsAt ?? "",
-    customerName:
-      booking?.customerName ??
-      session.metadata?.customerName ??
-      session.customer_details?.name ??
-      "Cliente",
-    customerEmail:
-      booking?.customerEmail ?? session.customer_details?.email ?? "",
-    customerPhone:
-      booking?.customerPhone ?? session.metadata?.customerPhone ?? "",
-  };
-
-  await sendBookingEmails(resend ?? null, emailPayload);
 
   return NextResponse.json({ received: true });
 }

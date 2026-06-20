@@ -1,25 +1,11 @@
-"use client";
-
-import { motion, type Variants } from "framer-motion";
-
-const BOOKING_URL = "https://www.firawellness.com/reserva-online";
-
-interface Plan {
-  name: string;
-  classes: string;
-  price: string;
-  period: string;
-  popular: boolean;
-  features: string[];
-}
-
-const plans: Plan[] = [
+const plans = [
   {
     name: "Esencial",
     classes: "5 Clases por mes",
     price: "$1,600",
     period: "/mes",
     popular: false,
+    stripeUrl: "https://buy.stripe.com/8x27sF5sv1TQgB7b63afS0j",
     features: [
       "5 clases al mes",
       "Acceso a todas las modalidades",
@@ -32,6 +18,7 @@ const plans: Plan[] = [
     price: "$2,400",
     period: "/mes",
     popular: false,
+    stripeUrl: "https://buy.stripe.com/fZu00d1cf41Yfx30rpafS0k",
     features: [
       "8 clases al mes",
       "Acceso a todas las modalidades",
@@ -45,6 +32,7 @@ const plans: Plan[] = [
     price: "$3,360",
     period: "/mes",
     popular: true,
+    stripeUrl: "https://buy.stripe.com/4gMbIVaMP0PM4Sp6PNafS0l",
     features: [
       "12 clases al mes",
       "Acceso a todas las modalidades",
@@ -59,6 +47,7 @@ const plans: Plan[] = [
     price: "$4,500",
     period: "/mes",
     popular: false,
+    stripeUrl: "https://buy.stripe.com/cNi14hf35buqesZ7TRafS0m",
     features: [
       "Clases ilimitadas",
       "Acceso a todas las modalidades",
@@ -70,34 +59,13 @@ const plans: Plan[] = [
   },
 ];
 
-const containerVariants: Variants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.15,
-    },
-  },
-};
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: "easeOut" },
-  },
-};
-
 export default function Pricing() {
   return (
     <section id="precios" className="relative py-24 md:py-32 px-4">
       <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16 max-w-2xl mx-auto"
+        {/* Section Header */}
+        <div
+          className="reveal-up text-center mb-16 max-w-2xl mx-auto"
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
             Planes y{" "}
@@ -109,25 +77,22 @@ export default function Pricing() {
             Con tu membresía tienes acceso a clases diseñadas para fortalecer,
             estilizar y equilibrar tu cuerpo de forma inteligente y sostenible.
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
+        {/* Pricing Cards */}
+        <div
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
         >
           {plans.map((plan, index) => (
-            <motion.div
+            <div
               key={index}
-              variants={cardVariants}
-              className={`relative p-8 rounded-[20px] flex flex-col transition-all duration-300 ${
+              className={`reveal-up relative p-8 rounded-[20px] flex flex-col transition-all duration-300 ${
                 plan.popular
                   ? "bg-coral text-white shadow-xl shadow-coral/20 scale-[1.03]"
                   : "glass-card"
               }`}
             >
+              {/* Popular Badge */}
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <span className="bg-white text-coral text-xs font-bold px-4 py-1.5 rounded-full shadow-md">
@@ -143,7 +108,6 @@ export default function Pricing() {
               >
                 {plan.name}
               </h3>
-
               <p
                 className={`text-sm mb-6 ${
                   plan.popular ? "text-white/80" : "text-warm-gray"
@@ -163,6 +127,7 @@ export default function Pricing() {
                 </span>
               </div>
 
+              {/* Features */}
               <ul className="flex-grow space-y-3 mb-8">
                 {plan.features.map((feature, fi) => (
                   <li key={fi} className="flex items-start gap-2 text-sm">
@@ -192,8 +157,9 @@ export default function Pricing() {
                 ))}
               </ul>
 
+              {/* CTA */}
               <a
-                href={BOOKING_URL}
+                href={plan.stripeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`w-full text-center py-3 rounded-full font-semibold text-sm transition-all duration-300 ${
@@ -204,9 +170,9 @@ export default function Pricing() {
               >
                 Suscribirme
               </a>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

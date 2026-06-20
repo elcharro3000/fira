@@ -1,21 +1,8 @@
-"use client";
-
-import { motion, type Variants } from "framer-motion";
-
-const BOOKING_URL = "https://www.firawellness.com/reserva-online";
-
-type Intensity = "Baja" | "Media" | "Alta";
-
-interface ClassItem {
-  name: string;
-  description: string;
-  intensity: Intensity;
-  icon: string;
-}
-
-const classes: ClassItem[] = [
+const classes = [
   {
     name: "Core Sculpt",
+    serviceId: "core-sculpt",
+    active: false,
     description:
       "Fortalece el centro del cuerpo con movimientos precisos y controlados. Mejora postura, estabilidad y conexión mente–cuerpo.",
     intensity: "Media",
@@ -23,6 +10,8 @@ const classes: ClassItem[] = [
   },
   {
     name: "Lower Body Burn",
+    serviceId: "lower-body-burn",
+    active: false,
     description:
       "Trabajo profundo de piernas y glúteos con enfoque en control y resistencia. Intenso, lento y altamente efectivo.",
     intensity: "Alta",
@@ -30,6 +19,8 @@ const classes: ClassItem[] = [
   },
   {
     name: "Full Body Burn",
+    serviceId: "full-body-burn",
+    active: false,
     description:
       "Entrenamiento completo que activa todo el cuerpo de forma equilibrada. Fuerza, coordinación y energía en una sola sesión.",
     intensity: "Alta",
@@ -37,6 +28,8 @@ const classes: ClassItem[] = [
   },
   {
     name: "Flow Full Body",
+    serviceId: "flow-full-body",
+    active: false,
     description:
       "Movimiento continuo y consciente que conecta respiración y fuerza. Ideal para fluir, soltar tensión y recuperar equilibrio.",
     intensity: "Media",
@@ -44,42 +37,32 @@ const classes: ClassItem[] = [
   },
   {
     name: "Stretching & Meditation",
+    serviceId: "stretching-meditation",
+    active: false,
     description:
       "Estiramientos suaves y respiración guiada para relajar el cuerpo y la mente. Una pausa consciente para cerrar la semana con calma.",
     intensity: "Baja",
     icon: "🧘",
   },
+  {
+    name: "Reformer Burn",
+    serviceId: "reformer-burn",
+    active: true,
+    description:
+      "Clase intensa y fluida que trabaja todo el cuerpo, combinando fuerza, control y resistencia desde un enfoque consciente.",
+    intensity: "Alta",
+    icon: "💪",
+  },
 ];
 
-const containerVariants: Variants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.12,
-    },
-  },
-};
-
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: "easeOut" },
-  },
-};
-
-function IntensityBadge({ level }: { level: Intensity }) {
-  const colors: Record<Intensity, string> = {
+function IntensityBadge({ level }: { level: string }) {
+  const colors: Record<string, string> = {
     Baja: "bg-green-100 text-green-700",
     Media: "bg-amber-100 text-amber-700",
     Alta: "bg-coral/10 text-coral",
   };
-
   return (
-    <span
-      className={`text-xs font-medium px-2.5 py-1 rounded-full ${colors[level]}`}
-    >
+    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${colors[level] || ""}`}>
       {level}
     </span>
   );
@@ -88,15 +71,13 @@ function IntensityBadge({ level }: { level: Intensity }) {
 export default function Classes() {
   return (
     <section id="clases" className="relative py-24 md:py-32 px-4">
+      {/* Background accent */}
       <div className="absolute inset-0 section-glow pointer-events-none" />
 
       <div className="relative z-10 max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16 max-w-2xl mx-auto"
+        {/* Section Header */}
+        <div
+          className="reveal-up text-center mb-16 max-w-2xl mx-auto"
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
             Nuestras{" "}
@@ -108,20 +89,16 @@ export default function Classes() {
             Cada sesión está diseñada para fortalecer, estilizar y equilibrar tu
             cuerpo de forma inteligente y sostenible.
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
+        {/* Class Cards - first row of 3, second row of 2 centered */}
+        <div
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-          {classes.map((cls, index) => (
-            <motion.div
+          {classes.filter((cls) => cls.active).map((cls, index) => (
+            <div
               key={index}
-              variants={cardVariants}
-              className={`glass-card p-8 flex flex-col gap-4 transition-all duration-300 group ${
+              className={`reveal-up glass-card p-8 flex flex-col gap-4 transition-all duration-300 group ${
                 index >= 3 ? "lg:col-span-1 lg:mx-auto lg:w-full" : ""
               }`}
             >
@@ -134,9 +111,7 @@ export default function Classes() {
                 {cls.description}
               </p>
               <a
-                href={BOOKING_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={`/reserva?serviceId=${cls.serviceId}`}
                 className="inline-flex items-center gap-2 text-coral font-semibold text-sm group-hover:gap-3 transition-all duration-300"
               >
                 Reserva Clase
@@ -154,23 +129,20 @@ export default function Classes() {
                   />
                 </svg>
               </a>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-center mt-16 max-w-3xl mx-auto"
+        {/* Quote */}
+        <div
+          className="reveal-up text-center mt-16 max-w-3xl mx-auto"
         >
           <blockquote className="text-warm-gray text-base sm:text-lg italic leading-relaxed font-[family-name:var(--font-playfair)]">
-            "Suscribirte no es comprometerte con un entrenamiento. Es elegir un
+            &ldquo;Suscribirte no es comprometerte con un entrenamiento. Es elegir un
             estilo de vida donde tu cuerpo, tu mente y tu energía son
-            prioridad."
+            prioridad.&rdquo;
           </blockquote>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
