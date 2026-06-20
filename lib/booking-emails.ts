@@ -26,10 +26,43 @@ function formatBookingDate(startsAt: string): string {
   });
 }
 
+async function sendPushNotification(
+  payload: BookingEmailPayload,
+  formattedDate: string
+): Promise<void> {
+  const topic = process.env.NTFY_TOPIC;
+  if (!topic) return;
+  try {
+    const headers: Record<string, string> = {
+      Title: "Nueva reserva en FIRA",
+      Priority: "high",
+      Tags: "calendar,tada",
+    };
+    if (process.env.NTFY_TOKEN) {
+      headers.Authorization = `Bearer ${process.env.NTFY_TOKEN}`;
+    }
+    await fetch(`https://ntfy.sh/${topic}`, {
+      method: "POST",
+      headers,
+      body: `${payload.customerName} | ${payload.serviceName} | ${formattedDate}`,
+    });
+  } catch (e) {
+    console.error("Push notification failed", {
+      sessionId: payload.sessionId,
+      error: e instanceof Error ? e.message : String(e),
+    });
+  }
+}
+
 export async function sendBookingEmails(
   resend: Resend | null,
   payload: BookingEmailPayload
 ) {
+  const formattedDate = formatBookingDate(payload.startsAt);
+
+  // Fire push notification regardless of email config — owner needs instant alerts
+  await sendPushNotification(payload, formattedDate);
+
   if (!resend) {
     console.error("booking email skipped: missing RESEND_API_KEY", {
       sessionId: payload.sessionId,
@@ -44,8 +77,6 @@ export async function sendBookingEmails(
     });
     return;
   }
-
-  const formattedDate = formatBookingDate(payload.startsAt);
 
   try {
     await resend.emails.send({
