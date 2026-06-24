@@ -64,8 +64,8 @@ export async function sendBookingEmails(
 
   const formattedDate = formatBookingDate(payload.startsAt);
 
-  if (sendCustomerEmail)
-  try {
+  if (sendCustomerEmail) {
+    try {
     const { error } = await resend.emails.send({
       from: RESEND_FROM_EMAIL,
       to: payload.customerEmail,
@@ -95,18 +95,19 @@ export async function sendBookingEmails(
     } else {
       result.customerEmailSent = true;
     }
-  } catch (e) {
-    console.error("Client confirmation email failed", {
-      sessionId: payload.sessionId,
-      bookingId: payload.bookingId,
-      to: payload.customerEmail,
-      from: RESEND_FROM_EMAIL,
-      error: e instanceof Error ? e.message : String(e),
-    });
+    } catch (e) {
+      console.error("Client confirmation email failed", {
+        sessionId: payload.sessionId,
+        bookingId: payload.bookingId,
+        to: payload.customerEmail,
+        from: RESEND_FROM_EMAIL,
+        error: e instanceof Error ? e.message : String(e),
+      });
+    }
   }
 
-  if (sendStudioEmail)
-  try {
+  if (sendStudioEmail) {
+    try {
     const { error } = await resend.emails.send({
       from: RESEND_FROM_EMAIL,
       to: STUDIO_EMAIL,
@@ -132,14 +133,15 @@ export async function sendBookingEmails(
     } else {
       result.studioEmailSent = true;
     }
-  } catch (e) {
-    console.error("Studio notification email failed", {
-      sessionId: payload.sessionId,
-      bookingId: payload.bookingId,
-      to: STUDIO_EMAIL,
-      from: RESEND_FROM_EMAIL,
-      error: e instanceof Error ? e.message : String(e),
-    });
+    } catch (e) {
+      console.error("Studio notification email failed", {
+        sessionId: payload.sessionId,
+        bookingId: payload.bookingId,
+        to: STUDIO_EMAIL,
+        from: RESEND_FROM_EMAIL,
+        error: e instanceof Error ? e.message : String(e),
+      });
+    }
   }
 
   return result;
