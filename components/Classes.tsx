@@ -53,6 +53,15 @@ const classes = [
     intensity: "Alta",
     icon: "💪",
   },
+  {
+    name: "Yoga y Soundbath",
+    serviceId: "yoga-soundbath",
+    active: true,
+    description:
+      "Una sesión para bajar el ritmo, mover el cuerpo con suavidad y cerrar con una experiencia sonora profunda que ayuda a descansar y reconectar.",
+    intensity: "Baja",
+    icon: "🧘",
+  },
 ];
 
 function IntensityBadge({ level }: { level: string }) {

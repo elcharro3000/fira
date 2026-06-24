@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPaidBookingsForSlot } from "@/lib/bookings-store";
 import { getSheetScheduleSlots } from "@/lib/google-sheets-schedule";
 import { getSlotStartsAt } from "@/lib/schedule";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -26,9 +27,21 @@ export async function GET(request: NextRequest) {
 
   try {
     const now = new Date();
-    const slots = (await getSheetScheduleSlots(from, to)).map((slot) => {
+    const supabase = createSupabaseAdminClient();
+    const slots = await Promise.all((await getSheetScheduleSlots(from, to)).map(async (slot) => {
       const startsAt = getSlotStartsAt(slot.date, slot.hour, slot.minute);
-      const bookedCount = getPaidBookingsForSlot(slot.slotId).length;
+      let memberBookedCount = 0;
+
+      if (supabase) {
+        const { count } = await supabase
+          .from("member_reservations")
+          .select("id", { count: "exact", head: true })
+          .eq("slot_id", slot.slotId)
+          .eq("status", "confirmed");
+        memberBookedCount = count ?? 0;
+      }
+
+      const bookedCount = getPaidBookingsForSlot(slot.slotId).length + memberBookedCount;
       const spotsLeft = Math.max(slot.capacity - bookedCount, 0);
 
       return {
@@ -37,7 +50,7 @@ export async function GET(request: NextRequest) {
         spotsLeft,
         startsAt: startsAt.toISOString(),
       };
-    });
+    }));
 
     return NextResponse.json(
       { slots },

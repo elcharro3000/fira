@@ -10,11 +10,12 @@ interface Slot {
   minute: number;
   slotId: string;
   className: string;
+  serviceId: string;
   available: boolean;
   startsAt: string;
 }
 
-const SERVICE_ID = "reformer-burn";
+const DEFAULT_SERVICE_ID = "reformer-burn";
 
 const DAY_LABELS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 const MONTH_LABELS = [
@@ -69,7 +70,7 @@ export default function CalendarioPage() {
     setError(false);
     try {
       const res = await fetch(
-        `/api/availability?from=${fromStr}&to=${toStr}&serviceId=${SERVICE_ID}`,
+        `/api/availability?from=${fromStr}&to=${toStr}&serviceId=${DEFAULT_SERVICE_ID}`,
         { cache: "no-store" },
       );
       if (!res.ok) throw new Error("Availability request failed");
@@ -101,15 +102,21 @@ export default function CalendarioPage() {
     setMonday(d);
   };
 
-  const handleReservar = (slotId: string) => {
-    router.push(`/reserva?serviceId=${SERVICE_ID}&slotId=${encodeURIComponent(slotId)}`);
+  const handleReservar = (slot: Slot) => {
+    router.push(
+      `/reserva?serviceId=${slot.serviceId || DEFAULT_SERVICE_ID}&slotId=${encodeURIComponent(slot.slotId)}`,
+    );
   };
 
   const now = new Date();
-  const slotsById = new Map(slots.map((slot) => [slot.slotId, slot]));
+  const slotsByDateTime = new Map<string, Slot[]>();
   const allTimes = new Set<string>();
   slots.forEach((slot) => {
-    allTimes.add(`${slot.hour}:${String(slot.minute).padStart(2, "0")}`);
+    const timeKey = `${slot.hour}:${String(slot.minute).padStart(2, "0")}`;
+    allTimes.add(timeKey);
+    const dateTimeKey = `${slot.date}-${timeKey}`;
+    const existing = slotsByDateTime.get(dateTimeKey) ?? [];
+    slotsByDateTime.set(dateTimeKey, [...existing, slot]);
   });
   const sortedTimes = Array.from(allTimes).sort((a, b) => {
     const [ah, am] = a.split(":").map(Number);
@@ -214,42 +221,49 @@ export default function CalendarioPage() {
                         </td>
                         {weekDays.map((day, di) => {
                           const dateStr = day.toISOString().slice(0, 10);
-                          const slotId = `${dateStr}T${String(rowH).padStart(2, "0")}:${String(rowM).padStart(2, "0")}:00`;
-                          const slot = slotsById.get(slotId);
+                          const timeKey = `${rowH}:${String(rowM).padStart(2, "0")}`;
+                          const daySlots = slotsByDateTime.get(`${dateStr}-${timeKey}`) ?? [];
 
-                          if (!slot) {
+                          if (daySlots.length === 0) {
                             return <td key={di} />;
                           }
 
-                          const isPast = new Date(slot.startsAt) < now;
-                          const bookable = !isPast && slot.available;
-
                           return (
-                            <td key={di} className="p-0">
-                              <div
-                                className={`rounded-xl p-2 text-center transition-all duration-200 ${
-                                  bookable
-                                    ? "bg-white/70 border border-peach/40 hover:border-coral/50 hover:bg-rose-glow/40 cursor-pointer"
-                                    : isPast
-                                    ? "bg-white/30 border border-peach/20 opacity-40"
-                                    : "bg-coral/10 border border-coral/20 opacity-60"
-                                }`}
-                              >
-                                <p className="text-xs font-medium text-foreground mb-1">
-                                  {slot.className}
-                                </p>
-                                {bookable ? (
-                                  <button
-                                    onClick={() => handleReservar(slotId)}
-                                    className="w-full text-xs font-semibold text-coral hover:text-coral-dark transition-colors"
-                                  >
-                                    Reservar
-                                  </button>
-                                ) : (
-                                  <span className="text-xs text-warm-gray">
-                                    {isPast ? "Pasado" : "Lleno"}
-                                  </span>
-                                )}
+                            <td key={di} className="p-0 align-top">
+                              <div className="space-y-1.5">
+                                {daySlots.map((slot) => {
+                                  const isPast = new Date(slot.startsAt) < now;
+                                  const bookable = !isPast && slot.available;
+
+                                  return (
+                                    <div
+                                      key={slot.slotId}
+                                      className={`rounded-xl p-2 text-center transition-all duration-200 ${
+                                        bookable
+                                          ? "bg-white/70 border border-peach/40 hover:border-coral/50 hover:bg-rose-glow/40 cursor-pointer"
+                                          : isPast
+                                          ? "bg-white/30 border border-peach/20 opacity-40"
+                                          : "bg-coral/10 border border-coral/20 opacity-60"
+                                      }`}
+                                    >
+                                      <p className="text-xs font-medium text-foreground mb-1">
+                                        {slot.className}
+                                      </p>
+                                      {bookable ? (
+                                        <button
+                                          onClick={() => handleReservar(slot)}
+                                          className="w-full text-xs font-semibold text-coral hover:text-coral-dark transition-colors"
+                                        >
+                                          Reservar
+                                        </button>
+                                      ) : (
+                                        <span className="text-xs text-warm-gray">
+                                          {isPast ? "Pasado" : "Lleno"}
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                })}
                               </div>
                             </td>
                           );

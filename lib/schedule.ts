@@ -9,6 +9,7 @@ export const SERVICES = [
   { id: "flow-full-body", name: "Flow Full Body", durationMinutes: 55, priceCents: 35000 },
   { id: "stretching-meditation", name: "Stretching & Meditation", durationMinutes: 55, priceCents: 35000 },
   { id: "reformer-burn", name: "Reformer Burn", durationMinutes: 55, priceCents: 35000 },
+  { id: "yoga-soundbath", name: "Yoga y Soundbath", durationMinutes: 55, priceCents: 35000 },
 ] as const;
 
 export type ServiceId = (typeof SERVICES)[number]["id"];
@@ -21,7 +22,6 @@ export const STUDIO_TIME_ZONE = "America/Mexico_City";
  * Values are [hour, minute] pairs in 24h format.
  */
 export const REFORMER_BURN_SCHEDULE: Record<number, [number, number][]> = {
-  0: [[10,10],[11,10],[12,10],[13,10]],
   1: [[7,10],[8,10],[9,10],[10,10],[11,10],[12,10],[13,10],[18,10],[19,10],[20,10]],
   2: [[7,10],[8,10],[9,10],[10,10],[11,10],[12,10],[13,10],[18,10],[19,10],[20,10]],
   3: [[7,10],[8,10],[9,10],[10,10],[11,10],[12,10],[13,10],[18,10],[19,10],[20,10]],
@@ -59,8 +59,21 @@ export function getSlotsForDateRange(
 /**
  * Convert a slot to a unique ISO-like string ID.
  */
-export function slotToId(date: string, hour: number, minute: number): string {
-  return `${date}T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00`;
+export function classNameToServiceId(className: string): ServiceId {
+  const normalized = className.trim().toLowerCase();
+  const service = SERVICES.find((item) => item.name.toLowerCase() === normalized);
+
+  return service?.id ?? "reformer-burn";
+}
+
+export function slotToId(
+  date: string,
+  hour: number,
+  minute: number,
+  serviceId?: string,
+): string {
+  const baseId = `${date}T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00`;
+  return serviceId ? `${baseId}--${serviceId}` : baseId;
 }
 
 function getTimeZoneOffsetMs(date: Date, timeZone: string): number {
@@ -108,6 +121,7 @@ export function getSlotStartsAt(
 
 export function slotFromId(slotId: string): { date: string; hour: number; minute: number } {
   const [date, time] = slotId.split("T");
-  const [h, m] = (time || "00:00:00").split(":").map(Number);
+  const [timePart] = (time || "00:00:00").split("--");
+  const [h, m] = timePart.split(":").map(Number);
   return { date: date || "", hour: h || 0, minute: m || 0 };
 }

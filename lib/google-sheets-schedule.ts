@@ -1,4 +1,4 @@
-import { getSlotsForDateRange, slotToId } from "@/lib/schedule";
+import { classNameToServiceId, getSlotsForDateRange, slotToId } from "@/lib/schedule";
 
 const DEFAULT_SHEET_CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRfXGcoeOUt8KYg_ETt7Vq5CQJF6wGUoNvObZ4FUq9yMV9SEfql3p42RQG4iPSjzF08vvygoqyz7t8I/pub?gid=0&single=true&output=csv";
@@ -34,17 +34,28 @@ export interface SheetScheduleSlot {
   hour: number;
   minute: number;
   className: string;
+  serviceId: string;
   capacity: number;
   slotId: string;
 }
 
 interface SheetScheduleRow {
+  date: string;
   day: string;
   time: string;
   class_name: string;
   capacity: string;
   active: string;
 }
+
+const YOGA_SOUNDBATH_ROWS: SheetScheduleRow[] = [
+  { date: "", day: "Tuesday", time: "18:30", class_name: "Yoga y Soundbath", capacity: "8", active: "TRUE" },
+  { date: "", day: "Tuesday", time: "19:30", class_name: "Yoga y Soundbath", capacity: "8", active: "TRUE" },
+  { date: "", day: "Wednesday", time: "18:30", class_name: "Yoga y Soundbath", capacity: "8", active: "TRUE" },
+  { date: "", day: "Wednesday", time: "19:30", class_name: "Yoga y Soundbath", capacity: "8", active: "TRUE" },
+  { date: "", day: "Thursday", time: "18:30", class_name: "Yoga y Soundbath", capacity: "8", active: "TRUE" },
+  { date: "", day: "Thursday", time: "19:30", class_name: "Yoga y Soundbath", capacity: "8", active: "TRUE" },
+];
 
 function parseCsv(csv: string): string[][] {
   const rows: string[][] = [];
@@ -98,6 +109,7 @@ function rowsFromCsv(csv: string): SheetScheduleRow[] {
     });
 
     return {
+      date: row.date ?? "",
       day: row.day ?? "",
       time: row.time ?? "",
       class_name: row.class_name ?? row.class ?? "Reformer Burn",
@@ -116,6 +128,14 @@ function parseTime(time: string): { hour: number; minute: number } | null {
   if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
 
   return { hour, minute };
+}
+
+function parseDate(value: string): string | null {
+  const date = value.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+
+  const parsed = new Date(`${date}T00:00:00`);
+  return Number.isNaN(parsed.getTime()) ? null : date;
 }
 
 function parseDay(value: string): number | null {
@@ -149,64 +169,67 @@ export async function getSheetScheduleSlots(
   toDate: Date,
 ): Promise<SheetScheduleSlot[]> {
   const csvUrl = process.env.GOOGLE_SHEET_CSV_URL ?? DEFAULT_SHEET_CSV_URL;
-  const response = await fetch(csvUrl, {
-    cache: "no-store",
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-      Accept: "text/csv",
-    },
-  });
+  const response = await fetch(csvUrl, { cache: "no-store" });
 
   if (!response.ok) {
     throw new Error(`Google Sheet schedule fetch failed: ${response.status}`);
   }
 
-  const text = await response.text();
-
-  if (text.includes("<html") || text.includes("<HTML")) {
-    throw new Error("Google returned HTML instead of CSV — sheet may not be published to web");
-  }
-
-  const rows = rowsFromCsv(text);
+  const sheetRows = rowsFromCsv(await response.text());
+  const hasYogaSoundbath = sheetRows.some(
+    (row) => row.class_name.trim().toLowerCase() === "yoga y soundbath",
+  );
+  const rows = hasYogaSoundbath
+    ? sheetRows
+    : [...sheetRows, ...YOGA_SOUNDBATH_ROWS];
   if (rows.length === 0) {
     return getSlotsForDateRange(fromDate, toDate).map((slot) => ({
       ...slot,
       className: "Reformer Burn",
+      serviceId: "reformer-burn",
       capacity: 8,
-      slotId: slotToId(slot.date, slot.hour, slot.minute),
+      slotId: slotToId(slot.date, slot.hour, slot.minute, "reformer-burn"),
     }));
   }
 
   const slots = new Map<string, SheetScheduleSlot>();
+  const cancelledSlotIds = new Set<string>();
 
   for (const row of rows) {
     const time = parseTime(row.time);
     const capacity = Number(row.capacity) || 8;
     const className = row.class_name || "Reformer Burn";
+    const serviceId = classNameToServiceId(className);
     if (!time || capacity <= 0) continue;
-    if (!isActive(row.active)) continue;
 
-    const dayNum = parseDay(row.day);
-    if (dayNum === null) continue;
-
-    const dates = datesInRangeForDay(fromDate, toDate, dayNum);
+    const date = parseDate(row.date);
+    const dates = date
+      ? [date]
+      : datesInRangeForDay(fromDate, toDate, parseDay(row.day) ?? -1);
 
     for (const slotDate of dates) {
       const slotDateObj = new Date(`${slotDate}T00:00:00`);
       if (slotDateObj < fromDate || slotDateObj > toDate) continue;
 
-      const slotId = slotToId(slotDate, time.hour, time.minute);
+      const slotId = slotToId(slotDate, time.hour, time.minute, serviceId);
+      if (!isActive(row.active)) {
+        cancelledSlotIds.add(slotId);
+        continue;
+      }
+
       slots.set(slotId, {
         date: slotDate,
         hour: time.hour,
         minute: time.minute,
         className,
+        serviceId,
         capacity,
         slotId,
       });
     }
   }
+
+  cancelledSlotIds.forEach((slotId) => slots.delete(slotId));
 
   return Array.from(slots.values()).sort((a, b) => a.slotId.localeCompare(b.slotId));
 }

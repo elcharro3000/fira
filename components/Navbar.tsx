@@ -7,6 +7,7 @@ const navLinks = [
   { label: "Clases", href: "/#clases" },
   { label: "Membresias", href: "/#precios" },
   { label: "Calendario", href: "/calendario" },
+  { label: "Mi cuenta", href: "/dashboard" },
   { label: "Contacto", href: "/#contacto" },
 ];
 

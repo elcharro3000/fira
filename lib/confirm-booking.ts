@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 import Stripe from "stripe";
 import { sendBookingEmails } from "@/lib/booking-emails";
+import { sendBookingPhoneNotification } from "@/lib/booking-notifications";
 import { updateBookingStatus } from "@/lib/bookings-store";
 
 export type ConfirmBookingResult =
@@ -59,9 +60,10 @@ export async function confirmBookingAndSendEmails(
   const legacySent = piMetadata.fira_emails_sent === "1";
   const customerAlreadySent = legacySent || piMetadata.fira_customer_email_sent === "1";
   const studioAlreadySent = legacySent || piMetadata.fira_studio_email_sent === "1";
+  const phoneAlreadySent = piMetadata.fira_phone_notification_sent === "1";
 
-  // Idempotency guard: if both emails already went out for this payment, stop here.
-  if (customerAlreadySent && studioAlreadySent) {
+  // Idempotency guard: if all notifications already went out for this payment, stop here.
+  if (customerAlreadySent && studioAlreadySent && phoneAlreadySent) {
     return "already-sent";
   }
 
@@ -76,30 +78,36 @@ export async function confirmBookingAndSendEmails(
     ? new Resend(process.env.RESEND_API_KEY)
     : null;
 
+  const notificationPayload = {
+    bookingId,
+    sessionId: session.id,
+    serviceName: metadata.serviceName ?? "Clase FIRA",
+    startsAt: metadata.startsAt ?? "",
+    customerName:
+      metadata.customerName ?? session.customer_details?.name ?? "Cliente",
+    customerEmail:
+      metadata.customerEmail ?? session.customer_details?.email ?? "",
+    customerPhone:
+      metadata.customerPhone ?? session.customer_details?.phone ?? "",
+  };
+
   const { customerEmailSent, studioEmailSent } = await sendBookingEmails(
     resend,
-    {
-      bookingId,
-      sessionId: session.id,
-      serviceName: metadata.serviceName ?? "Clase FIRA",
-      startsAt: metadata.startsAt ?? "",
-      customerName:
-        metadata.customerName ?? session.customer_details?.name ?? "Cliente",
-      customerEmail:
-        metadata.customerEmail ?? session.customer_details?.email ?? "",
-      customerPhone:
-        metadata.customerPhone ?? session.customer_details?.phone ?? "",
-    },
+    notificationPayload,
     {
       sendCustomerEmail: !customerAlreadySent,
       sendStudioEmail: !studioAlreadySent,
     }
   );
 
+  const phoneNotificationSent = phoneAlreadySent
+    ? false
+    : await sendBookingPhoneNotification(notificationPayload);
+
   // Track each email independently so a failure on one side (e.g. the studio
   // notification) can still be retried on the next webhook delivery without
   // re-sending the other.
-  if (paymentIntent && (customerEmailSent || studioEmailSent)) {
+  if (paymentIntent && (customerEmailSent || studioEmailSent || phoneNotificationSent)) {
     const newMetadata = { ...paymentIntent.metadata };
     delete newMetadata.fira_emails_sent;
     if (customerAlreadySent || customerEmailSent) {
@@ -107,6 +115,9 @@ export async function confirmBookingAndSendEmails(
     }
     if (studioAlreadySent || studioEmailSent) {
       newMetadata.fira_studio_email_sent = "1";
+    }
+    if (phoneAlreadySent || phoneNotificationSent) {
+      newMetadata.fira_phone_notification_sent = "1";
     }
     try {
       await stripe.paymentIntents.update(paymentIntent.id, {
@@ -122,5 +133,6 @@ export async function confirmBookingAndSendEmails(
 
   const customerDone = customerAlreadySent || customerEmailSent;
   const studioDone = studioAlreadySent || studioEmailSent;
-  return customerDone && studioDone ? "sent" : "error";
+  const phoneDone = phoneAlreadySent || phoneNotificationSent;
+  return customerDone && studioDone && phoneDone ? "sent" : "error";
 }

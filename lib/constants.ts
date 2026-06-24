@@ -16,3 +16,11 @@ export const STUDIO_EMAIL = "firawellness@gmail.com";
 export const RESEND_FROM_EMAIL =
   process.env.RESEND_FROM_EMAIL ??
   "FIRA Wellness Club <noreply@firawellness.com>";
+
+/**
+ * ntfy topic used by the studio phone app for new paid booking alerts.
+ */
+export const NTFY_TOPIC =
+  process.env.NTFY_TOPIC ?? "fira-booking-notifications";
+
+export const NTFY_BASE_URL = process.env.NTFY_BASE_URL ?? "https://ntfy.sh";

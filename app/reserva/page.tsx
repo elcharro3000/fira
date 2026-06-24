@@ -12,13 +12,15 @@ const SERVICE_NAMES: Record<string, string> = {
   "flow-full-body": "Flow Full Body",
   "stretching-meditation": "Stretching & Meditation",
   "reformer-burn": "Reformer Burn",
+  "yoga-soundbath": "Yoga y Soundbath",
 };
 
 function formatSlot(slotId: string | null): string | null {
   if (!slotId) return null;
 
   const [date, time] = slotId.split("T");
-  const [hourValue, minuteValue] = (time ?? "").split(":").map(Number);
+  const [timePart] = (time ?? "").split("--");
+  const [hourValue, minuteValue] = timePart.split(":").map(Number);
   if (!date || Number.isNaN(hourValue) || Number.isNaN(minuteValue)) return null;
 
   const [year, month, day] = date.split("-").map(Number);

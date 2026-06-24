@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { confirmBookingAndSendEmails } from "@/lib/confirm-booking";
+import { creditMemberPackageFromStripeSession } from "@/lib/member-purchases";
 
 export const dynamic = "force-dynamic";
 
@@ -45,8 +46,12 @@ export async function POST(request: NextRequest) {
     event.type === "checkout.session.async_payment_succeeded"
   ) {
     const session = event.data.object as Stripe.Checkout.Session;
-    // Idempotent: safe even if the success page already sent the emails.
-    await confirmBookingAndSendEmails(session.id);
+    if (session.metadata?.purchaseType === "member-package") {
+      await creditMemberPackageFromStripeSession(session);
+    } else {
+      // Idempotent: safe even if the success page already sent the emails.
+      await confirmBookingAndSendEmails(session.id);
+    }
   }
 
   return NextResponse.json({ received: true });
