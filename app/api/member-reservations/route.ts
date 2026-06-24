@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       .eq("status", "confirmed"),
     admin
       .from("member_profiles")
-      .select("email, full_name, class_credits_remaining")
+      .select("email, full_name, phone, class_credits_remaining")
       .eq("id", user.id)
       .single(),
   ]);
@@ -64,6 +64,10 @@ export async function POST(request: NextRequest) {
   const credits = Number(profile?.class_credits_remaining ?? 0);
   if (credits <= 0) {
     return NextResponse.redirect(new URL("/dashboard?error=no-credits", request.url));
+  }
+
+  if (!profile?.full_name) {
+    return NextResponse.redirect(new URL("/dashboard?profile=missing-name#perfil", request.url));
   }
 
   const { data: reservation, error: insertError } = await admin
@@ -99,6 +103,7 @@ export async function POST(request: NextRequest) {
     startsAt: startsAt.toISOString(),
     memberEmail: profile?.email ?? user.email ?? "Sin email",
     memberName: profile?.full_name,
+    memberPhone: profile?.phone,
     remainingCredits,
   });
 

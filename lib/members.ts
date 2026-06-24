@@ -39,8 +39,16 @@ export async function ensureMemberProfile(user: {
   const supabase = createSupabaseAdminClient();
   if (!supabase || !user.email) return null;
 
-  const fullName = user.user_metadata?.full_name ?? user.user_metadata?.name ?? null;
-  const phone = user.user_metadata?.phone ?? null;
+  const { data: existingProfile } = await supabase
+    .from("member_profiles")
+    .select("full_name, phone")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const metadataName = user.user_metadata?.full_name ?? user.user_metadata?.name;
+  const metadataPhone = user.user_metadata?.phone;
+  const fullName = metadataName ?? existingProfile?.full_name ?? null;
+  const phone = metadataPhone ?? existingProfile?.phone ?? null;
 
   const { data, error } = await supabase
     .from("member_profiles")

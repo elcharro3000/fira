@@ -16,6 +16,7 @@ export type MemberReservationNotificationPayload = {
   startsAt: string;
   memberEmail: string;
   memberName?: string | null;
+  memberPhone?: string | null;
   remainingCredits: number;
 };
 
@@ -153,8 +154,9 @@ export async function sendMemberReservationPhoneNotification(
   payload: MemberReservationNotificationPayload,
 ): Promise<boolean> {
   const message = [
-    `Miembro: ${payload.memberName || payload.memberEmail}`,
+    `Nombre: ${payload.memberName || payload.memberEmail}`,
     `Email: ${payload.memberEmail}`,
+    `Telefono: ${payload.memberPhone || "No registrado"}`,
     `Clase: ${payload.serviceName}`,
     `Horario: ${formatBookingDate(payload.startsAt)}`,
     `Creditos restantes: ${payload.remainingCredits}`,

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import { updateMemberProfile } from "./actions";
 import { MEMBER_PACKAGES } from "@/lib/member-packages";
 import { ensureMemberProfile, getMemberDashboardData } from "@/lib/members";
 import { createSupabaseServerClient, hasSupabaseConfig } from "@/lib/supabase/server";
@@ -29,7 +30,7 @@ function formatMoney(cents: number): string {
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; reserved?: string; purchase?: string }>;
+  searchParams: Promise<{ error?: string; reserved?: string; purchase?: string; profile?: string }>;
 }) {
   const params = await searchParams;
 
@@ -82,6 +83,7 @@ export default async function DashboardPage({
   }
 
   const { profile, upcomingReservations, pastReservations, purchases } = dashboardData;
+  const needsProfile = !profile.full_name;
 
   return (
     <>
@@ -108,15 +110,76 @@ export default async function DashboardPage({
             </div>
           </section>
 
-          {(params.reserved || params.purchase || params.error) && (
+          {(params.reserved || params.purchase || params.error || params.profile) && (
             <div className="rounded-2xl border border-coral/20 bg-coral/10 px-4 py-3 text-sm text-coral">
               {params.reserved === "success" && "Tu clase quedó reservada."}
               {params.purchase === "success" && "Pago recibido. Tus clases se agregarán en cuanto Stripe confirme el pago."}
               {params.purchase === "cancelled" && "El pago fue cancelado."}
+              {params.profile === "updated" && "Tu perfil quedó actualizado."}
+              {params.profile === "missing-name" && "Agrega tu nombre para que el estudio identifique tus reservas."}
+              {params.profile === "error" && "No pudimos actualizar tu perfil. Intenta de nuevo."}
               {params.error === "no-credits" && "No tienes clases disponibles. Compra un paquete para reservar."}
               {params.error && !["no-credits"].includes(params.error) && `Error: ${params.error}`}
             </div>
           )}
+
+          <section id="perfil" className={`glass-card p-8 ${needsProfile ? "border-coral/40" : ""}`}>
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 mb-6">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-coral mb-3">
+                  Tus datos
+                </p>
+                <h2 className="text-2xl font-bold mb-2">
+                  {needsProfile ? "Completa tu perfil" : "Perfil de reserva"}
+                </h2>
+                <p className="text-warm-gray max-w-2xl leading-relaxed">
+                  Estos datos aparecen en las notificaciones del estudio para que
+                  puedan identificar quién reservó, cuándo y cómo contactarte si es necesario.
+                </p>
+              </div>
+              {needsProfile && (
+                <span className="self-start rounded-full bg-coral/10 px-4 py-2 text-sm font-semibold text-coral">
+                  Requerido para reservas claras
+                </span>
+              )}
+            </div>
+
+            <form action={updateMemberProfile} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 md:items-end">
+              <div>
+                <label htmlFor="fullName" className="block text-sm font-semibold mb-2">
+                  Nombre completo
+                </label>
+                <input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  required
+                  defaultValue={profile.full_name ?? ""}
+                  placeholder="Ej. Alexa Aguila"
+                  className="w-full rounded-2xl border border-peach/50 bg-white/70 px-4 py-3 outline-none transition-colors focus:border-coral"
+                />
+              </div>
+              <div>
+                <label htmlFor="phone" className="block text-sm font-semibold mb-2">
+                  Teléfono
+                </label>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  defaultValue={profile.phone ?? ""}
+                  placeholder="Ej. 55 1234 5678"
+                  className="w-full rounded-2xl border border-peach/50 bg-white/70 px-4 py-3 outline-none transition-colors focus:border-coral"
+                />
+              </div>
+              <button className="rounded-full bg-coral px-6 py-3 font-semibold text-white hover:bg-coral-dark transition-colors shadow-md shadow-coral/20">
+                Guardar
+              </button>
+            </form>
+            <p className="mt-4 text-sm text-warm-gray">
+              Email de acceso: <span className="font-medium text-foreground">{profile.email}</span>
+            </p>
+          </section>
 
           <section className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-6">
             <div className="glass-card p-8">
