@@ -41,7 +41,7 @@ export default function Navbar() {
             <a
               key={link.href}
               href={link.href}
-              className="inline-flex min-h-11 items-center text-sm font-medium text-foreground/70 hover:text-coral transition-colors duration-200"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center px-1 text-sm font-medium text-foreground/70 hover:text-coral transition-colors duration-200"
             >
               {link.label}
             </a>
@@ -89,7 +89,7 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex min-h-11 items-center text-sm font-medium text-foreground/70 hover:text-coral transition-colors"
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center px-1 text-sm font-medium text-foreground/70 hover:text-coral transition-colors"
                 >
                   {link.label}
                 </a>

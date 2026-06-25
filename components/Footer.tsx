@@ -11,16 +11,16 @@ export default function Footer() {
 
           {/* Links */}
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-warm-gray">
-            <a href="/#inicio" className="inline-flex min-h-11 items-center hover:text-coral transition-colors">
+            <a href="/#inicio" className="inline-flex min-h-11 min-w-11 items-center justify-center px-1 hover:text-coral transition-colors">
               Inicio
             </a>
-            <a href="/#clases" className="inline-flex min-h-11 items-center hover:text-coral transition-colors">
+            <a href="/#clases" className="inline-flex min-h-11 min-w-11 items-center justify-center px-1 hover:text-coral transition-colors">
               Clases
             </a>
-            <a href="/#precios" className="inline-flex min-h-11 items-center hover:text-coral transition-colors">
+            <a href="/#precios" className="inline-flex min-h-11 min-w-11 items-center justify-center px-1 hover:text-coral transition-colors">
               Membresias
             </a>
-            <a href="/#contacto" className="inline-flex min-h-11 items-center hover:text-coral transition-colors">
+            <a href="/#contacto" className="inline-flex min-h-11 min-w-11 items-center justify-center px-1 hover:text-coral transition-colors">
               Contacto
             </a>
           </div>
