@@ -66,35 +66,35 @@ export async function sendBookingEmails(
 
   if (sendCustomerEmail) {
     try {
-    const { error } = await resend.emails.send({
-      from: RESEND_FROM_EMAIL,
-      to: payload.customerEmail,
-      replyTo: STUDIO_EMAIL,
-      subject: `Reserva confirmada — ${payload.serviceName}`,
-      html: `
-        <h2 style="color:#E8587A;">Reserva confirmada ✓</h2>
-        <p>Hola ${payload.customerName},</p>
-        <p>Tu clase en FIRA Wellness Club está confirmada.</p>
-        <ul>
-          <li><strong>Clase:</strong> ${payload.serviceName}</li>
-          <li><strong>Fecha y hora:</strong> ${formattedDate}</li>
-          <li><strong>Dirección:</strong> Av. Horacio 632, Polanco, Ciudad de México</li>
-        </ul>
-        <p>Nos vemos en el estudio.</p>
-        <p>— FIRA Wellness Club</p>
-      `,
-    });
-    if (error) {
-      console.error("Client confirmation email rejected", {
-        sessionId: payload.sessionId,
-        bookingId: payload.bookingId,
-        to: payload.customerEmail,
+      const { error } = await resend.emails.send({
         from: RESEND_FROM_EMAIL,
-        error,
+        to: payload.customerEmail,
+        replyTo: STUDIO_EMAIL,
+        subject: `Reserva confirmada — ${payload.serviceName}`,
+        html: `
+          <h2 style="color:#E8587A;">Reserva confirmada ✓</h2>
+          <p>Hola ${payload.customerName},</p>
+          <p>Tu clase en FIRA Wellness Club está confirmada.</p>
+          <ul>
+            <li><strong>Clase:</strong> ${payload.serviceName}</li>
+            <li><strong>Fecha y hora:</strong> ${formattedDate}</li>
+            <li><strong>Dirección:</strong> Av. Horacio 632, Polanco, Ciudad de México</li>
+          </ul>
+          <p>Nos vemos en el estudio.</p>
+          <p>— FIRA Wellness Club</p>
+        `,
       });
-    } else {
-      result.customerEmailSent = true;
-    }
+      if (error) {
+        console.error("Client confirmation email rejected", {
+          sessionId: payload.sessionId,
+          bookingId: payload.bookingId,
+          to: payload.customerEmail,
+          from: RESEND_FROM_EMAIL,
+          error,
+        });
+      } else {
+        result.customerEmailSent = true;
+      }
     } catch (e) {
       console.error("Client confirmation email failed", {
         sessionId: payload.sessionId,
@@ -108,31 +108,31 @@ export async function sendBookingEmails(
 
   if (sendStudioEmail) {
     try {
-    const { error } = await resend.emails.send({
-      from: RESEND_FROM_EMAIL,
-      to: STUDIO_EMAIL,
-      subject: `Nueva reserva: ${payload.customerName} — ${payload.serviceName}`,
-      html: `
-        <h2>Nueva reserva</h2>
-        <p><strong>Cliente:</strong> ${payload.customerName}</p>
-        <p><strong>Email:</strong> ${payload.customerEmail}</p>
-        <p><strong>Teléfono:</strong> ${payload.customerPhone}</p>
-        <p><strong>Clase:</strong> ${payload.serviceName}</p>
-        <p><strong>Fecha y hora:</strong> ${formattedDate}</p>
-        <p><strong>Session Stripe:</strong> ${payload.sessionId}</p>
-      `,
-    });
-    if (error) {
-      console.error("Studio notification email rejected", {
-        sessionId: payload.sessionId,
-        bookingId: payload.bookingId,
-        to: STUDIO_EMAIL,
+      const { error } = await resend.emails.send({
         from: RESEND_FROM_EMAIL,
-        error,
+        to: STUDIO_EMAIL,
+        subject: `Nueva reserva: ${payload.customerName} — ${payload.serviceName}`,
+        html: `
+          <h2>Nueva reserva</h2>
+          <p><strong>Cliente:</strong> ${payload.customerName}</p>
+          <p><strong>Email:</strong> ${payload.customerEmail}</p>
+          <p><strong>Teléfono:</strong> ${payload.customerPhone}</p>
+          <p><strong>Clase:</strong> ${payload.serviceName}</p>
+          <p><strong>Fecha y hora:</strong> ${formattedDate}</p>
+          <p><strong>Session Stripe:</strong> ${payload.sessionId}</p>
+        `,
       });
-    } else {
-      result.studioEmailSent = true;
-    }
+      if (error) {
+        console.error("Studio notification email rejected", {
+          sessionId: payload.sessionId,
+          bookingId: payload.bookingId,
+          to: STUDIO_EMAIL,
+          from: RESEND_FROM_EMAIL,
+          error,
+        });
+      } else {
+        result.studioEmailSent = true;
+      }
     } catch (e) {
       console.error("Studio notification email failed", {
         sessionId: payload.sessionId,
