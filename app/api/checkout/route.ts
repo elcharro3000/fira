@@ -30,7 +30,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const body = (await request.json()) as CheckoutRequestBody;
+  let body: CheckoutRequestBody;
+  try {
+    body = (await request.json()) as CheckoutRequestBody;
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 },
+    );
+  }
   const serviceId = body.serviceId ?? "reformer-burn";
   const service = SERVICES.find((item) => item.id === serviceId);
   const slotId = body.slotId ?? "";

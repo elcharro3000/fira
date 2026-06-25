@@ -31,7 +31,7 @@ export default function Navbar() {
     >
       <div className="flex items-center justify-between px-4 py-2 md:px-6 md:py-3">
         {/* Logo */}
-        <a href="/" className="flex-shrink-0" aria-label="FIRA Wellness Club">
+        <a href="/" className="flex min-h-11 flex-shrink-0 items-center" aria-label="FIRA Wellness Club">
           <span className="fira-logo fira-logo-nav" aria-hidden="true" />
         </a>
 
@@ -41,7 +41,7 @@ export default function Navbar() {
             <a
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-foreground/70 hover:text-coral transition-colors duration-200"
+              className="inline-flex min-h-11 items-center text-sm font-medium text-foreground/70 hover:text-coral transition-colors duration-200"
             >
               {link.label}
             </a>
@@ -51,7 +51,7 @@ export default function Navbar() {
         {/* CTA Button */}
         <a
           href={BOOKING_URL}
-          className="hidden md:inline-flex items-center gap-2 bg-coral text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-coral-dark transition-colors duration-200 shadow-md shadow-coral/20"
+          className="hidden min-h-11 md:inline-flex items-center gap-2 bg-coral text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-coral-dark transition-colors duration-200 shadow-md shadow-coral/20"
         >
           Reserva Clase
         </a>
@@ -59,7 +59,7 @@ export default function Navbar() {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden flex flex-col gap-1.5 p-2"
+          className="md:hidden flex min-h-11 min-w-11 flex-col items-center justify-center gap-1.5 p-2"
           aria-label="Toggle menu"
         >
           <span
@@ -89,14 +89,14 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="text-sm font-medium text-foreground/70 hover:text-coral transition-colors"
+                  className="inline-flex min-h-11 items-center text-sm font-medium text-foreground/70 hover:text-coral transition-colors"
                 >
                   {link.label}
                 </a>
               ))}
               <a
                 href={BOOKING_URL}
-                className="bg-coral text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-coral-dark transition-colors shadow-md shadow-coral/20"
+                className="inline-flex min-h-11 items-center bg-coral text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-coral-dark transition-colors shadow-md shadow-coral/20"
               >
                 Reserva Clase
               </a>

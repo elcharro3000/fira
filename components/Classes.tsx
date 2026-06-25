@@ -121,7 +121,7 @@ export default function Classes() {
               </p>
               <a
                 href={`/reserva?serviceId=${cls.serviceId}`}
-                className="inline-flex items-center gap-2 text-coral font-semibold text-sm group-hover:gap-3 transition-all duration-300"
+                className="inline-flex min-h-11 items-center gap-2 text-coral font-semibold text-sm group-hover:gap-3 transition-all duration-300"
               >
                 Reserva Clase
                 <svg
