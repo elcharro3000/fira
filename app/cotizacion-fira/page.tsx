@@ -18,15 +18,16 @@ const includedItems = [
   "Notificaciones al teléfono del equipo",
   "Dashboard para clientas",
   "Control de paquetes y créditos",
+  "Carga inicial de clases en la página y calendario",
   "Configuración del sitio en producción",
 ];
 
 const monthlyItems = [
   "Revisar que reservas, pagos y correos funcionen",
   "Soporte si algo falla con Stripe, dashboard o notificaciones",
-  "Cambios pequeños de horarios, textos, clases o precios",
+  "Cambios de precios o información en el sitio cuando sea necesario",
+  "Quitar clases del sitio si dejan de ofrecerse",
   "Cuidado técnico de hosting, dominio, Vercel y Supabase",
-  "Hasta 2 ajustes pequeños al mes",
 ];
 
 export default function FiraQuotePage() {
@@ -54,11 +55,13 @@ export default function FiraQuotePage() {
               Lo más importante 🌿
             </p>
             <h2 className="mt-4 text-4xl font-bold text-coral sm:text-5xl">
-              $3,500 MXN / mes
+              $4,000 MXN / mes
             </h2>
             <p className="mt-4 text-base leading-relaxed text-warm-gray">
               Mantenimiento mensual para que el sistema siga funcionando después
               del lanzamiento: reservas, pagos, correos, dashboard y notificaciones.
+              La carga inicial de clases queda incluida; si después se necesita quitar
+              o ajustar clases en el sitio, también se puede apoyar dentro de los ajustes del mes.
             </p>
             <div className="mt-6 space-y-3">
               {monthlyItems.map((item) => (
@@ -119,22 +122,12 @@ export default function FiraQuotePage() {
         </section>
 
         <section className="mx-auto mt-8 max-w-5xl">
-          <div className="glass-card p-6 sm:p-8">
-            <h2 className="text-2xl font-bold">Costos externos 🧾</h2>
-            <p className="mt-4 text-sm leading-relaxed text-warm-gray">
-              El mantenimiento cubre soporte y cuidado técnico. Servicios externos como dominio,
-              comisiones de Stripe, correo, Vercel o Supabase se pagan directo al proveedor si el uso lo requiere.
-            </p>
-          </div>
-        </section>
-
-        <section className="mx-auto mt-8 max-w-5xl">
           <div className="glass-card border border-coral/20 p-6 text-center sm:p-10">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral">
               Resumen claro 💗
             </p>
             <h2 className="mt-4 text-3xl font-bold sm:text-4xl">
-              $68,000 MXN inicial + $3,500 MXN mensuales
+              $68,000 MXN inicial + $4,000 MXN mensuales
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-warm-gray sm:text-base">
               La inversión inicial deja la plataforma lista. El mantenimiento mensual
