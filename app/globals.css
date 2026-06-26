@@ -94,13 +94,7 @@ body::after {
   inset: 0;
   pointer-events: none;
   z-index: -1;
-  background:
-    radial-gradient(ellipse 10px 4px at 12% 18%, rgba(230,250,255,0.35) 0 45%, transparent 68%),
-    radial-gradient(ellipse 13px 5px at 34% 12%, rgba(160,205,255,0.24) 0 45%, transparent 68%),
-    radial-gradient(ellipse 8px 3px at 66% 24%, rgba(230,250,255,0.30) 0 45%, transparent 68%),
-    radial-gradient(ellipse 12px 4px at 84% 16%, rgba(190,170,255,0.20) 0 45%, transparent 68%),
-    radial-gradient(ellipse 11px 4px at 24% 68%, rgba(230,250,255,0.24) 0 45%, transparent 68%),
-    radial-gradient(ellipse 14px 5px at 76% 72%, rgba(160,205,255,0.22) 0 45%, transparent 68%);
+  background: none;
   opacity: 0;
   transition: opacity 600ms ease;
 }
@@ -112,6 +106,54 @@ body::after {
 }
 
 [data-theme="dark"] body::after {
+  background-image:
+    radial-gradient(ellipse 10px 4px at 12% 18%, rgba(230,250,255,0.50) 0 45%, transparent 68%),
+    radial-gradient(ellipse 13px 5px at 34% 12%, rgba(160,205,255,0.36) 0 45%, transparent 68%),
+    radial-gradient(ellipse 8px 3px at 66% 24%, rgba(230,250,255,0.44) 0 45%, transparent 68%),
+    radial-gradient(ellipse 12px 4px at 84% 16%, rgba(190,170,255,0.28) 0 45%, transparent 68%),
+    radial-gradient(ellipse 11px 4px at 24% 68%, rgba(230,250,255,0.34) 0 45%, transparent 68%),
+    radial-gradient(ellipse 14px 5px at 76% 72%, rgba(160,205,255,0.32) 0 45%, transparent 68%),
+    radial-gradient(ellipse 6px 3px at 18px 22px, rgba(232,250,255,0.34) 0 42%, transparent 70%),
+    radial-gradient(ellipse 5px 9px at 42px 56px, rgba(0,98,255,0.34) 0 42%, transparent 70%),
+    radial-gradient(ellipse 7px 4px at 72px 38px, rgba(168,224,255,0.28) 0 42%, transparent 70%),
+    radial-gradient(ellipse 5px 8px at 34px 28px, rgba(18,88,255,0.28) 0 42%, transparent 70%),
+    radial-gradient(ellipse 4px 3px at 88px 72px, rgba(238,252,255,0.26) 0 42%, transparent 70%);
+  background-position:
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    18px 10px,
+    6px 42px,
+    34px 78px,
+    12px 118px;
+  background-repeat:
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    repeat,
+    repeat,
+    repeat,
+    repeat,
+    repeat;
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    118px 106px,
+    154px 142px,
+    196px 174px,
+    132px 168px,
+    228px 212px;
   opacity: 1;
 }
 
