@@ -329,39 +329,32 @@ body::before {
   content: "";
   position: absolute;
   inset: 0;
-  width: 200vw;
+  width: calc(100vw + 480px);
   height: 100%;
-  background:
-    radial-gradient(ellipse 18px 5px at 28px 18px, rgba(230,250,255,0.66) 0 40%, transparent 68%),
-    radial-gradient(ellipse 10px 3px at 96px 74px, rgba(160,205,255,0.36) 0 42%, transparent 70%),
-    radial-gradient(ellipse 15px 4px at 172px 42px, rgba(230,250,255,0.42) 0 40%, transparent 68%),
-    radial-gradient(ellipse 8px 3px at 242px 114px, rgba(190,170,255,0.22) 0 42%, transparent 70%),
-    radial-gradient(ellipse 20px 5px at 318px 92px, rgba(220,245,255,0.46) 0 40%, transparent 68%);
-  background-size: 380px 150px;
+  --particle-start-x: -480px;
+  --particle-y: 0px;
+  background-image: url("/light-particles.svg");
+  background-size: 480px 240px;
   background-repeat: repeat;
-  transform: translate3d(-50vw, 0, 0);
+  transform: translate3d(var(--particle-start-x), var(--particle-y), 0);
   will-change: transform;
-  animation: projectedSpecksSlide 56s linear infinite;
+  animation: projectedSpecksSlide 72s linear infinite;
 }
 
 .dark-reflections::after {
-  opacity: 0.46;
-  background:
-    radial-gradient(ellipse 9px 3px at 42px 34px, rgba(230,250,255,0.40) 0 42%, transparent 70%),
-    radial-gradient(ellipse 7px 3px at 128px 98px, rgba(120,170,255,0.28) 0 42%, transparent 70%),
-    radial-gradient(ellipse 12px 4px at 226px 58px, rgba(210,238,255,0.36) 0 42%, transparent 70%),
-    radial-gradient(ellipse 6px 2px at 336px 136px, rgba(170,205,255,0.24) 0 42%, transparent 70%);
-  background-size: 420px 180px;
-  transform: translate3d(-50vw, 0, 0);
-  animation-duration: 88s;
+  opacity: 0.42;
+  --particle-start-x: -560px;
+  --particle-y: 36px;
+  background-size: 560px 280px;
+  animation-duration: 110s;
 }
 
 @keyframes projectedSpecksSlide {
   0% {
-    transform: translate3d(-50vw, 0, 0);
+    transform: translate3d(var(--particle-start-x), var(--particle-y), 0);
   }
   100% {
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(0, var(--particle-y), 0);
   }
 }
 
@@ -372,15 +365,22 @@ body::before {
 
   .dark-reflections::before,
   .dark-reflections::after {
-    width: 200vw;
-    background-size: 310px 132px;
-    animation-duration: 42s;
+    width: calc(100vw + 360px);
+    background-size: 360px 180px;
+    animation-duration: 64s;
   }
 
   .dark-reflections::after {
-    background-size: 360px 156px;
-    animation-duration: 64s;
+    background-size: 430px 215px;
+    animation-duration: 96s;
   }
+}
+
+[data-theme="dark"] .orb,
+[data-theme="dark"] .orb::before,
+[data-theme="dark"] .orb::after,
+[data-theme="dark"] .bubble {
+  animation: none;
 }
 
 /* Selection color */
