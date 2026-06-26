@@ -147,20 +147,25 @@ export default function Contact() {
               ))}
             </div>
 
-            {/* Google Maps embed: Av. Horacio 632, Polanco, CDMX */}
-            <div className="mt-8 rounded-xl overflow-hidden h-48 bg-rose-glow/30">
-              <iframe
-                title="FIRA Wellness Club — Av. Horacio 632, Polanco, Ciudad de México"
-                src="https://maps.google.com/maps?q=Av.+Horacio+632,+Polanco,+Ciudad+de+M%C3%A9xico&z=15&output=embed"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                className="rounded-xl w-full h-full min-h-[12rem]"
-              />
-            </div>
+            <a
+              href="https://maps.google.com/?q=Av.+Horacio+632+Polanco+Ciudad+de+Mexico"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-8 flex min-h-48 flex-col justify-between rounded-xl border border-peach/30 bg-rose-glow/30 p-5 transition-colors hover:border-coral/40"
+              aria-label="Abrir FIRA Wellness Club en Google Maps"
+            >
+              <div>
+                <p className="text-sm font-semibold text-coral">Ubicación</p>
+                <p className="mt-2 text-lg font-bold">Av. Horacio 632</p>
+                <p className="mt-1 text-sm text-warm-gray">Polanco, Ciudad de México</p>
+              </div>
+              <span className="inline-flex items-center text-sm font-semibold text-coral">
+                Abrir en Google Maps
+                <svg className="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </span>
+            </a>
           </div>
         </div>
       </div>
