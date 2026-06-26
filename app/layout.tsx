@@ -1,36 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
+import DarkModeReflections from "@/components/DarkModeReflections";
 import ThemeManager from "@/components/ThemeManager";
 import "./globals.css";
-
-const themeScript = `(() => {
-  try {
-    const override = localStorage.getItem("fira-theme-override");
-    if (override === "dark" || override === "light") {
-      document.documentElement.dataset.theme = override;
-      return;
-    }
-
-    const debugTheme = localStorage.getItem("fira-theme-debug");
-    if (debugTheme === "night") {
-      document.documentElement.dataset.theme = "dark";
-      return;
-    }
-    if (debugTheme === "day") {
-      document.documentElement.dataset.theme = "light";
-      return;
-    }
-
-    const hour = Number(new Intl.DateTimeFormat("en-US", {
-      timeZone: "America/Mexico_City",
-      hourCycle: "h23",
-      hour: "2-digit"
-    }).format(new Date()));
-    document.documentElement.dataset.theme = hour < 7 || hour >= 19 ? "dark" : "light";
-  } catch (_) {
-    document.documentElement.dataset.theme = "light";
-  }
-})();`;
 
 const inter = Inter({
   variable: "--font-inter",
@@ -78,11 +50,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="scroll-smooth">
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
       <body className={`${inter.variable} ${playfair.variable} antialiased`}>
         <ThemeManager />
+        <DarkModeReflections />
         {children}
       </body>
     </html>

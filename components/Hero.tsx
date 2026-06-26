@@ -21,7 +21,7 @@ export default function Hero() {
         <div
           className="reveal-up reveal-delay-1 inline-flex items-center gap-2 bg-white/60 backdrop-blur-md border border-peach/40 rounded-full px-4 py-2 mb-8"
         >
-          <span className="w-2 h-2 rounded-full bg-coral" />
+          <span className="w-2 h-2 rounded-full bg-coral animate-pulse" />
           <span className="text-sm font-medium text-warm-gray">
             Wellness Club &amp; Pilates &nbsp;·&nbsp; Polanco, CDMX
           </span>
