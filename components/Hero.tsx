@@ -1,4 +1,5 @@
 import { BOOKING_URL } from "@/lib/constants";
+import DarkModeReflections from "@/components/DarkModeReflections";
 
 export default function Hero() {
   return (
@@ -6,6 +7,8 @@ export default function Hero() {
       id="inicio"
       className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-4"
     >
+      <DarkModeReflections />
+
       {/* Animated Orb */}
       <div className="orb" />
 
@@ -19,7 +22,7 @@ export default function Hero() {
       <div className="relative z-10 text-center max-w-4xl mx-auto">
         {/* Badge */}
         <div
-          className="reveal-up reveal-delay-1 inline-flex items-center gap-2 bg-white/60 backdrop-blur-md border border-peach/40 rounded-full px-4 py-2 mb-8"
+          className="reveal-up reveal-delay-1 inline-flex items-center gap-2 bg-white/60 border border-peach/40 rounded-full px-4 py-2 mb-8"
         >
           <span className="w-2 h-2 rounded-full bg-coral" />
           <span className="text-sm font-medium text-warm-gray">

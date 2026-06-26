@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
-import DarkModeReflections from "@/components/DarkModeReflections";
 import ThemeManager from "@/components/ThemeManager";
 import "./globals.css";
 
@@ -52,7 +51,6 @@ export default function RootLayout({
     <html lang="es" className="scroll-smooth">
       <body className={`${inter.variable} ${playfair.variable} antialiased`}>
         <ThemeManager />
-        <DarkModeReflections />
         {children}
       </body>
     </html>

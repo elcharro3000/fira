@@ -76,7 +76,7 @@ body {
   transition: background 600ms ease, color 600ms ease;
 }
 
-body > *:not(.dark-reflections) {
+body > * {
   position: relative;
   z-index: 1;
 }
@@ -314,14 +314,20 @@ body::before {
 }
 
 .dark-reflections {
-  position: fixed;
+  position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
-  opacity: calc(var(--reflection-opacity) * 0.62);
+  opacity: 0;
+  visibility: hidden;
   transition: opacity 600ms ease;
   contain: strict;
+}
+
+[data-theme="dark"] .dark-reflections {
+  opacity: calc(var(--reflection-opacity) * 0.62);
+  visibility: visible;
 }
 
 .dark-reflections::before,
@@ -360,6 +366,10 @@ body::before {
 
 @media (max-width: 640px) {
   .dark-reflections {
+    opacity: 0;
+  }
+
+  [data-theme="dark"] .dark-reflections {
     opacity: calc(var(--reflection-opacity) * 0.78);
   }
 
@@ -380,6 +390,16 @@ body::before {
 [data-theme="dark"] .orb::before,
 [data-theme="dark"] .orb::after,
 [data-theme="dark"] .bubble {
+  animation: none;
+}
+
+[data-theme="dark"] .glass-nav,
+[data-theme="dark"] .backdrop-blur-md {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+[data-theme="dark"] .reveal-up {
   animation: none;
 }
 
