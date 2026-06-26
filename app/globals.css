@@ -319,9 +319,15 @@ body::before {
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
-  opacity: calc(var(--reflection-opacity) * 0.62);
+  opacity: 0;
+  visibility: hidden;
   transition: opacity 600ms ease;
   contain: paint;
+}
+
+[data-theme="dark"] .dark-reflections {
+  opacity: calc(var(--reflection-opacity) * 0.48);
+  visibility: visible;
 }
 
 .dark-reflections::before,
@@ -370,21 +376,28 @@ body::before {
 }
 
 @media (max-width: 640px) {
-  .dark-reflections {
-    opacity: calc(var(--reflection-opacity) * 0.78);
+  [data-theme="dark"] .dark-reflections {
+    opacity: calc(var(--reflection-opacity) * 0.42);
   }
 
   .dark-reflections::before,
   .dark-reflections::after {
     inset: -24%;
     background-size: 250px 190px;
-    animation-name: projectedSpecksDriftMobile;
-    animation-duration: 22s;
+    animation: none;
+    transform: translate3d(-6vw, -3vh, 0) rotate(-8deg);
   }
 
   .dark-reflections::after {
     background-size: 340px 260px;
-    animation-duration: 34s;
+    transform: translate3d(5vw, 4vh, 0) rotate(11deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dark-reflections::before,
+  .dark-reflections::after {
+    animation: none;
   }
 }
 
