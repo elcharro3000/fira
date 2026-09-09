@@ -23,11 +23,13 @@ const includedItems = [
 ];
 
 const monthlyItems = [
-  "Revisar que reservas, pagos y correos funcionen",
-  "Soporte si algo falla con Stripe, dashboard o notificaciones",
-  "Cambios de precios o información en el sitio cuando sea necesario",
-  "Quitar clases del sitio si dejan de ofrecerse",
-  "Cuidado técnico de hosting, dominio, Vercel y Supabase",
+  "Hosting administrado en Vercel con SSL y monitoreo",
+  "Dominio estándar incluido el primer año",
+  "Soporte prioritario por WhatsApp con respuesta en 24h hábiles",
+  "Hasta 6 cambios ligeros al mes",
+  "SEO básico y optimización continua",
+  "Reporte mensual y recomendaciones de mejora",
+  "Mantenimiento preventivo del sitio",
 ];
 
 export default function FiraQuotePage() {
@@ -45,6 +47,7 @@ export default function FiraQuotePage() {
             <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-warm-gray sm:text-lg">
               Sitio web, reservas, pagos y dashboard para que las clientas puedan
               comprar paquetes, ver sus clases disponibles y reservar fácil.
+              Precio con descuento amigos y familia para la etapa actual del estudio.
             </p>
           </div>
         </section>
@@ -52,16 +55,15 @@ export default function FiraQuotePage() {
         <section className="mx-auto mt-8 grid max-w-5xl grid-cols-1 gap-5 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="reveal-up glass-card border border-coral/30 p-6 sm:p-8 reveal-delay-1">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-coral">
-              Lo más importante 🌿
+              Plan Business 🌿
             </p>
             <h2 className="mt-4 text-4xl font-bold text-coral sm:text-5xl">
-              $4,000 MXN / mes
+              $3,500 MXN / mes
             </h2>
             <p className="mt-4 text-base leading-relaxed text-warm-gray">
-              Mantenimiento mensual para que el sistema siga funcionando después
-              del lanzamiento: reservas, pagos, correos, dashboard y notificaciones.
-              La carga inicial de clases queda incluida; si después se necesita quitar
-              o ajustar clases en el sitio, también se puede apoyar dentro de los ajustes del mes.
+              Plan Business de TopSitio — hosting, soporte prioritario, SEO básico
+              y hasta 6 cambios ligeros al mes. Incluye mantenimiento del sitio,
+              monitoreo y optimización continua para que FIRA siempre funcione bien.
             </p>
             <div className="mt-6 space-y-3">
               {monthlyItems.map((item) => (
@@ -76,13 +78,16 @@ export default function FiraQuotePage() {
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-warm-gray">
               Inversión inicial 💻
             </p>
-            <h2 className="mt-4 text-4xl font-bold sm:text-5xl">$68,000 MXN</h2>
+            <h2 className="mt-4 text-4xl font-bold sm:text-5xl">
+              <span className="text-coral line-through decoration-2">$68,000 MXN</span>
+              <span className="ml-3">$6,800 MXN</span>
+            </h2>
             <p className="mt-4 text-base leading-relaxed text-warm-gray">
               Pago único por construir y dejar funcionando la plataforma completa.
             </p>
             <div className="mt-6 rounded-[24px] bg-coral/10 p-5 text-sm leading-relaxed text-warm-gray">
-              Valor regular estimado: <strong className="text-foreground">$78,000 MXN</strong>.
-              Para FIRA se propone un precio preferencial por la etapa actual del estudio.
+              <strong className="text-foreground">Descuento amigos y familia:</strong> 90% de descuento
+              sobre el precio regular de $68,000 MXN. Precio especial exclusivo por la etapa actual del estudio.
             </div>
           </div>
         </section>
@@ -127,14 +132,35 @@ export default function FiraQuotePage() {
               Resumen claro 💗
             </p>
             <h2 className="mt-4 text-3xl font-bold sm:text-4xl">
-              $68,000 MXN inicial + $4,000 MXN mensuales
+              $6,800 MXN inicial + $3,500 MXN mensuales
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-warm-gray sm:text-base">
-              La inversión inicial deja la plataforma lista. El mantenimiento mensual
-              ayuda a que siga operando bien mientras FIRA crece.
+              Descuento amigos y familia del 90% en la inversión inicial.
+              El plan Business mensual de TopSitio mantiene el sitio funcionando,
+              optimizado y con soporte prioritario.
             </p>
           </div>
         </section>
+
+        <div className="mx-auto mt-8 max-w-5xl text-center">
+          <a
+            href="https://topsitio.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block transition-opacity hover:opacity-80"
+          >
+            <img
+              src="/topsitio-logo-light.png"
+              alt="TopSitio"
+              className="block h-20 w-auto dark:hidden"
+            />
+            <img
+              src="/topsitio-logo-dark.png"
+              alt="TopSitio"
+              className="hidden h-20 w-auto dark:block"
+            />
+          </a>
+        </div>
       </main>
       <Footer />
     </>
